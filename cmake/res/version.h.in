@@ -1,0 +1,6 @@
+#pragma once
+
+constinit const auto PROJECT_VERSION_MAJOR = @PROJECT_VERSION_MAJOR@;
+constinit const auto PROJECT_VERSION_MINOR = @PROJECT_VERSION_MINOR@;
+constinit const auto PROJECT_VERSION_PATCH = @PROJECT_VERSION_PATCH@;
+constinit const auto FULL_PROJECT_VERSION = "@PROJECT_VERSION@";
