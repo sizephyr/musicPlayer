@@ -9,9 +9,9 @@ if(MAKE_DEFAULT_CONFIG AND (NOT DEFINED FORCED_APPLICATION_CONFIG_PATH
   if(NOT EXISTS "${CONFIG_FILEPATH}")
     set(YAML_CONTENT
         "window:
-  width: 640
-  height: 640
-  title: \"ICL WorkShift\"
+  width: 1000
+  height: 600
+  title: \"player\"
   background: \":/qt/qml/Main/img/base_background.jpg\"
 animaltion:
   duration_ms: 250 # общая продолжительность анимаций

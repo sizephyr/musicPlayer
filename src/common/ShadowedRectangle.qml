@@ -11,6 +11,7 @@ Rectangle {
     property alias baseColor: contentItem.color
     property bool lowProfile: false // маленькая "тень" снизу
     property bool selected: false
+    property color contentColor: Configuration.theme.mutedWhiteColor
 
     color: selected ? Configuration.theme.grayColor : Configuration.theme.lightGrayColor
 
@@ -19,7 +20,7 @@ Rectangle {
         anchors.fill: parent
         anchors.margins: root.lowProfile ? 1 : 2
         anchors.bottomMargin: root.lowProfile ? 2 : 5
-        radius: parent.radius
-        color: "white"
+        radius: root.radius
+        color: root.contentColor
     }
 }

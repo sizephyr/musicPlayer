@@ -14,7 +14,9 @@ set(QML_IMPORT_PATH
     CACHE PATH "Path to application qml modules" FORCE)
 include(FetchContent)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
+find_package(TagLib REQUIRED)
+find_package(ZLIB REQUIRED)
 include(cmake/define_version_h.cmake)
 
 qt_standard_project_setup(REQUIRES 6.11)
@@ -29,28 +31,25 @@ if(APPLE)
 else()
   message(STATUS "Non-Apple platform. Standard compilation flags applied.")
 endif()
+option(SHOW_RESOURCES "Показать ресурсы проекта в лог" OFF)
 
 add_subdirectory(src)
 add_subdirectory(src/configuration_management)
 add_subdirectory(src/common)
 add_subdirectory(src/core)
 add_subdirectory(src/page_manager)
-add_subdirectory(src/header)
 add_subdirectory(src/notify_manager)
-# add_subdirectory(src/first_configuration_page)
-add_subdirectory(src/auth_page)
+add_subdirectory(src/main_page)
 
 qt_add_executable(musicPlayer src/main.cpp)
 
+if(SHOW_RESOURCES)
+  target_compile_definitions(musicPlayer PRIVATE SHOW_RESOURCES)
+endif()
+
 target_link_libraries(
-  musicPlayer
-  PRIVATE Qt6::Quick
-          mainplugin
-          headerplugin
-          coreplugin
-          page_managerplugin
-          notify_managerplugin
-          auth_pageplugin)
+  musicPlayer PRIVATE Qt6::Quick mainplugin coreplugin page_managerplugin
+                      notify_managerplugin)
 
 install(
   TARGETS musicPlayer

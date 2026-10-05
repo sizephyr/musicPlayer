@@ -41,8 +41,11 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_BINARY_DIR}/src/qml/modules/common/lib"
   SOURCES
-  statuslabel.h)
+  statuslabel.h
+  filemanagebackend.h
+  filemanagebackend.cpp)
 
-target_link_libraries(common_lib PRIVATE Qt6::Core Qt6::Quick)
+target_link_libraries(common_lib PRIVATE Qt6::Core Qt6::Quick Qt6::Multimedia
+                                         TagLib::TagLib ZLIB::ZLIB)
 target_include_directories(common_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(common_lib PRIVATE "${CMAKE_BINARY_DIR}")

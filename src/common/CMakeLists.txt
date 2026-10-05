@@ -26,15 +26,11 @@ qt_add_qml_module(
   StatusLabel.qml
   BaseTextInput.qml
   BaseTextArea.qml
-
-
   SOURCES
   basebuttonstyle.h
   pageclosingcontext.h
   RESOURCES
-  img/female_pic.png
-  img/male_pic.png
-  img/unknown_sex_icon_pic.png
+  img/unknown_icon_pic.png
   img/append_pic.png
   img/search_bar_magnifier_pic.png)
 
