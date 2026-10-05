@@ -1,7 +1,9 @@
-// #include <QDirIterator>
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
+#ifdef SHOW_RESOURCES
+#include <QDirIterator>
+#endif
 #ifdef Q_OS_MAC
 #include <objc/message.h>
 #include <objc/runtime.h>
@@ -27,11 +29,14 @@ int main(int argc, char* argv[]) {
       []() { QCoreApplication::exit(-1); }, Qt::QueuedConnection);
   engine.loadFromModule("Main", "Main");
 
-  // QDirIterator it(":", QDirIterator::Subdirectories);
-  // while (it.hasNext()) {
-  //   qDebug() << it.next();
-  // }
+#ifdef SHOW_RESOURCES
+  QDirIterator it(":", QDirIterator::Subdirectories);
+  while (it.hasNext()) {
+    qDebug() << it.next();
+  }
+#endif
 
+  /// \todo убрать в отдельный файл
 #ifdef Q_OS_MAC
   // Настройка прозрачного заголовка через чистый C++ Objective-C Runtime
   if (!engine.rootObjects().isEmpty()) {

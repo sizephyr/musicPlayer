@@ -3,15 +3,15 @@
 #include <QObject>
 #include <QQmlEngine>
 
-namespace AuthPage {
+namespace MainPage {
 
 class Model : public QObject {
   Q_OBJECT
   QML_ELEMENT
  public:
-  explicit Model(QObject *parent = nullptr);
+  explicit Model(QObject* parent = nullptr);
 
  signals:
 };
 
-}  // namespace AuthPage
+}  // namespace MainPage

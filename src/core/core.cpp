@@ -1,18 +1,17 @@
 #include "core.h"
 
-#include <authpagemodel.h>
+#include <mainpagemodel.h>
 #include <simplepagecontextwithmodel.h>
 
 Core::Core(QQuickItem* parent) : QQuickItem(parent) {}
 
 void Core::setPageManager(PageManagement::PageManager* pageManager) {
   _pageManager = pageManager;
-  // if (!_configured) {
-  //   _pageManager->goTo(
-  //       PageManagement::PageType::FirstConfigurationPage,
-  //       std::make_shared<PageManagement::SimplePageContextWithModel<
-  //           FirstConfigurationPage::Model>>(nullptr, true, ""));
-  // }
+  _pageManager->goTo(
+      PageManagement::PageType::MainPage,
+      std::make_shared<
+          PageManagement::SimplePageContextWithModel<MainPage::Model>>(nullptr,
+                                                                       ""));
 }
 
 void Core::setConfiguredState(bool configured) {

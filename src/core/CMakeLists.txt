@@ -25,4 +25,4 @@ target_link_libraries(
           configurationplugin
           common_lib
           page_managerplugin
-          auth_pageplugin)
+          main_pageplugin)

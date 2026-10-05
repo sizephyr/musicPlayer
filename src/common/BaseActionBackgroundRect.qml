@@ -1,19 +1,10 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls.Basic
-import Qt5Compat.GraphicalEffects
 import modules.configuration
-import modules.header
 
 Rectangle {
     id: root
-    topLeftRadius: baseRadius
-    topRightRadius: baseRadius
-    color: Configuration.theme.semiTransparentWhiteColor
+    color: Configuration.theme.semiTransparentGrayColor
 
-    Component.onCompleted: {
-        HeaderModel.callBeforeClose = hideAndCall.bind(root, HeaderModel.canBeClosed.bind(HeaderModel));
-    }
     // на момент Component.onCompleted размеры ещё просто не успели примениться
     onHeightChanged: {
         if (height > 0 && !appearanceAnimation.running && translateTransform.y === 0) {

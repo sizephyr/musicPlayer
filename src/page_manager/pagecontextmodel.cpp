@@ -4,17 +4,13 @@
 
 namespace PageManagement {
 
-PageContextModel::PageContextModel(QObject *parent)
+PageContextModel::PageContextModel(QObject* parent)
     : PageContextModel(PageType::None, nullptr, parent) {}
 
 PageContextModel::PageContextModel(PageType type,
                                    std::shared_ptr<IPageContext> context,
-                                   QObject *parent)
+                                   QObject* parent)
     : QObject{parent}, _pageType(type), _pageContext(std::move(context)) {}
-
-bool PageContextModel::showHeader() const {
-  return _pageContext && _pageContext->showHeader();
-}
 
 QString PageContextModel::pageTitle() const {
   if (_pageContext) {
@@ -31,10 +27,8 @@ QUrl PageContextModel::pageSource() const {
   const auto prefix = QStringLiteral("qrc:/qt/qml/modules/");
 
   switch (_pageType) {
-    case AuthPage:
-      return {prefix + "auth_page/AuthPage.qml"};
-    case FirstConfigurationPage:
-      return {prefix + "first_configuration_page/FirstConfigurationPage.qml"};
+    case MainPage:
+      return {prefix + "main_page/MainPage.qml"};
     default:
       return {};
   }
@@ -43,7 +37,7 @@ QUrl PageContextModel::pageSource() const {
 PageType PageContextModel::pageType() const { return _pageType; }
 
 QVariant PageContextModel::contextSpecificData(
-    const PageContextSpecificDataKey &key) {
+    const PageContextSpecificDataKey& key) {
   if (_pageContext) {
     return _pageContext->getSpecificData(key);
   }

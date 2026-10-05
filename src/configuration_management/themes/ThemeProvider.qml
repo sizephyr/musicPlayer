@@ -17,4 +17,5 @@ QtObject {
     readonly property color darkYellowColor: "#b38600"
     readonly property color lightYellowColor: "#fffbe6"
     readonly property color semiTransparentWhiteColor: "#aaffffff"
+    readonly property color semiTransparentGrayColor: "#aa7e8798"
 }

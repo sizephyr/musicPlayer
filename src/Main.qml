@@ -3,7 +3,6 @@ import modules.configuration
 import modules.notify_manager
 import modules.page_manager
 import modules.core
-import modules.header
 
 Window {
     width: Configuration.windowWidth()
@@ -36,37 +35,12 @@ Window {
 
             Item {
                 id: contentItem
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                height: parent.height * 0.9
-                width: parent.width * 0.95
+                anchors.fill: parent
 
                 Loader {
                     id: contentLoader
                     anchors.fill: parent
                     source: PageManager.currentPageContextModel ? PageManager.currentPageContextModel.pageSource : ""
-                }
-            }
-
-            HeaderMenu {
-                id: headerMenu
-                anchors.top: header.top
-                anchors.right: header.right
-                anchors.rightMargin: header.border.width
-                baseHeight: header.height
-                width: header.width - header.border.width * 2
-                mainColor: header.mainColor
-            }
-            Header {
-                id: header
-                anchors.top: parent.top
-                anchors.horizontalCenter: parent.horizontalCenter
-
-                height: parent.height * 0.085
-                width: parent.width * 0.95
-                clip: true
-                onMenuTriggered: {
-                    headerMenu.expanded = !headerMenu.expanded;
                 }
             }
         }
