@@ -15,7 +15,8 @@ qt_add_qml_module(
   MainPage.qml
   SOURCES
   mainpagemodel.h
-  mainpagemodel.cpp)
+  mainpagemodel.cpp
+  QML_FILES PlayProgressBar.qml)
 
 target_link_libraries(
   main_page PRIVATE Qt6::Gui Qt6::Quick Qt6::Qml commonplugin

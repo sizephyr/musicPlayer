@@ -23,19 +23,21 @@ BaseActionBackgroundRect {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    ShadowedRectangle {
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
+                    spacing: 50
 
-                        selected: true
-                        baseColor: Configuration.theme.lightGrayColor
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: width
+
+                        border.width: 4
+                        border.color: Configuration.theme.semiTransparentMutedWhiteColor
+                        color: Configuration.theme.semiTransparentLightGrayColor
+                        radius: Configuration.r3Radius
                     }
-                    ShadowedRectangle {
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 3
 
-                        selected: true
-                        baseColor: Configuration.theme.lightGrayColor
+                    PlayProgressBar {
+                        id: playProgressBar
+                        Layout.fillWidth: true
                     }
                 }
             }
