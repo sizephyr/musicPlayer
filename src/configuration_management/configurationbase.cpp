@@ -1,5 +1,7 @@
 #include "configurationbase.h"
 
+#include <utils/utils.h>
+
 #include <QDir>
 #include <QLoggingCategory>
 #include <QStandardPaths>
@@ -10,11 +12,12 @@ const auto loggingCategory = QLoggingCategory("configuration.base");
 
 constinit const auto defaultAnimationDuration = std::chrono::milliseconds(250);
 constinit const auto defaultNotificationHideAfterMs =
-    std::chrono::milliseconds(400);
-constinit const auto referenceDisplaySize = QSize(1080, 1920);
+    std::chrono::milliseconds(4000);
+constinit const auto referenceDisplaySize = QSize(1920, 1080);
 
-constinit const auto applicationConfigFilename = "ApplicationConfig.yaml";
-constinit const auto networkConfigFilename = "NetworkConfig.yaml";
+constinit const auto applicationConfigFilename = "ApplicationConfig.json";
+constinit const auto networkConfigFilename = "NetworkConfig.json";
+constinit const auto unitConfigFilename = "UnitConfig.json";
 constinit const auto windowNode = "window";
 
 namespace Keys {
@@ -47,18 +50,21 @@ void Base::load() {
                              configPathExp.error().toStdString());
   }
 
-  try {
-    _applicationConfigRoot =
-        YAML::LoadFile(std::filesystem::canonical(configPathExp.value()));
-  } catch (const std::exception& e) {
+  if (auto rawConfigExp = Utils::JSON::readJsonFile(
+          std::filesystem::canonical(configPathExp.value()))) {
+    _rawApplicationConfig = rawConfigExp.value();
+  } else {
     throw std::runtime_error(QString("Невалидная конфигурация приложения: %1")
-                                 .arg(e.what())
+                                 .arg(rawConfigExp.error())
                                  .toStdString());
   }
 }
 
 std::expected<std::filesystem::path, QString> Base::getApplicationConfigPath() {
-#ifndef FORCED_APPLICATION_CONFIG_PATH
+#ifdef FORCED_APPLICATION_CONFIG_PATH
+  return std::filesystem::path(FORCED_APPLICATION_CONFIG_PATH);
+#endif
+
   QString configDirStr =
       QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
 
@@ -71,13 +77,13 @@ std::expected<std::filesystem::path, QString> Base::getApplicationConfigPath() {
   }
 
   return std::filesystem::path(configFilePath.toStdString());
-#else
-  return std::filesystem::path(FORCED_APPLICATION_CONFIG_PATH);
-#endif
 }
 
 std::expected<std::filesystem::path, QString> Base::getNetworkConfigPath() {
-#ifndef FORCED_NETWORK_CONFIG_PATH
+#ifdef FORCED_NETWORK_CONFIG_PATH
+  return std::filesystem::path(FORCED_NETWORK_CONFIG_PATH);
+#endif
+
   QString configDirStr =
       QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
 
@@ -89,108 +95,109 @@ std::expected<std::filesystem::path, QString> Base::getNetworkConfigPath() {
   }
 
   return std::filesystem::path(configFilePath.toStdString());
-#else
-  return std::filesystem::path(FORCED_NETWORK_CONFIG_PATH);
-#endif
 }
 
-std::expected<void, QString> Base::parseNetworkConfig(
-    const YAML::Node& rawConfig) {
-  return {};
+std::optional<QJsonObject> Base::windowObject() const {
+  if (_rawApplicationConfig.contains(Keys::windowNode) &&
+      _rawApplicationConfig.value(Keys::windowNode).isObject()) {
+    return _rawApplicationConfig.value(Keys::windowNode).toObject();
+  }
+
+  return std::nullopt;
+}
+
+std::optional<QJsonObject> Base::animationObject() const {
+  if (_rawApplicationConfig.contains(Keys::animationNode) &&
+      _rawApplicationConfig.value(Keys::animationNode).isObject()) {
+    return _rawApplicationConfig.value(Keys::animationNode).toObject();
+  }
+
+  return std::nullopt;
+}
+
+std::optional<QJsonObject> Base::networkObject() const {
+  if (_rawApplicationConfig.contains(Keys::networkNode) &&
+      _rawApplicationConfig.value(Keys::networkNode).isObject()) {
+    return _rawApplicationConfig.value(Keys::networkNode).toObject();
+  }
+
+  return std::nullopt;
 }
 
 int Base::windowWidth() const {
-  try {
-    static const auto width =
-        _applicationConfigRoot[Keys::windowNode][Keys::width]  // NOLINT
-            .as<int>();
-
-    return width;
-  } catch (const YAML::Exception& e) {
-    throw std::runtime_error(
-        "Конфигурация не содержит ожидаемого поля: window.width");
+  if (auto windowObjectOpt = windowObject();
+      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::width) &&
+      windowObjectOpt->value(Keys::width).isDouble()) {
+    return windowObjectOpt->value(Keys::width).toInt();
   }
+
+  return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 int Base::windowHeight() const {
-  try {
-    static const auto height =
-        _applicationConfigRoot[Keys::windowNode][Keys::height]  // NOLINT
-            .as<int>();
-
-    return height;
-  } catch (const YAML::Exception& e) {
-    throw std::runtime_error(
-        "Конфигурация не содержит ожидаемого поля: window.height");
+  if (auto windowObjectOpt = windowObject();
+      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::height) &&
+      windowObjectOpt->value(Keys::height).isDouble()) {
+    return windowObjectOpt->value(Keys::height).toInt();
   }
+
+  return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 QString Base::windowTitle() const {
-  try {
-    static const auto title =
-        _applicationConfigRoot[Keys::windowNode][Keys::title]  // NOLINT
-            .as<std::string>();
-
-    return QString::fromStdString(title);
-  } catch (const YAML::Exception& e) {
-    throw std::runtime_error(
-        "Конфигурация не содержит ожидаемого поля: window.title");
+  if (auto windowObjectOpt = windowObject();
+      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::title) &&
+      windowObjectOpt->value(Keys::title).isString()) {
+    return windowObjectOpt->value(Keys::title).toString();
   }
+
+  return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 int Base::animationDurationMs() const {
-  try {
-    static const auto height =
-        _applicationConfigRoot[Keys::animationNode]          // NOLINT
-                              [Keys::baseTransferTimeoutMs]  // NOLINT
-                                  .as<int>();
-
-    return height;
-  } catch (const YAML::Exception& e) {
-    return defaultAnimationDuration.count();
+  if (auto animationObjectOpt = animationObject();
+      animationObjectOpt.has_value() &&
+      animationObjectOpt->contains(Keys::durationMs) &&
+      animationObjectOpt->value(Keys::durationMs).isDouble()) {
+    return animationObjectOpt->value(Keys::durationMs).toInt();
   }
+
+  return defaultAnimationDuration
+      .count();  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 int Base::baseTransferTimeoutMs() const {
-  try {
-    static const auto height =
-        _applicationConfigRoot[Keys::networkNode]
-                              [Keys::baseTransferTimeoutMs]  // NOLINT
-                                  .as<int>();
-
-    return height;
-  } catch (const YAML::Exception& e) {
-    throw std::runtime_error(
-        "Конфигурация не содержит ожидаемого поля: "
-        "network.base_transfer_timeout_ms");
+  if (auto networkObjectOpt = networkObject();
+      networkObjectOpt.has_value() &&
+      networkObjectOpt->contains(Keys::baseTransferTimeoutMs) &&
+      networkObjectOpt->value(Keys::baseTransferTimeoutMs).isDouble()) {
+    return networkObjectOpt->value(Keys::baseTransferTimeoutMs).toInt();
   }
+
+  return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 int Base::notificationHideAfterMs() const {
-  try {
-    static const auto height =
-        _applicationConfigRoot[Keys::animationNode]            // NOLINT
-                              [Keys::notificationHideAfterMs]  // NOLINT
-                                  .as<int>();
-
-    return height;
-  } catch (const YAML::Exception& e) {
-    return defaultNotificationHideAfterMs.count();
+  if (auto animationObjectOpt = animationObject();
+      animationObjectOpt.has_value() &&
+      animationObjectOpt->contains(Keys::durationMs) &&
+      animationObjectOpt->value(Keys::durationMs).isDouble()) {
+    return animationObjectOpt->value(Keys::notificationHideAfterMs).toInt();
   }
+
+  return defaultNotificationHideAfterMs
+      .count();  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 QString Base::windowBackground() const {
-  try {
-    static const auto title =
-        _applicationConfigRoot[Keys::windowNode][Keys::background]  // NOLINT
-            .as<std::string>();
-
-    return QString::fromStdString(title);
-  } catch (const YAML::Exception& e) {
-    qCInfo(loggingCategory)
-        << "Конфигурация не содержит ожидаемого поля: window:background";
-    return ":/qt/qml/Main/img/base_background.jpg";
+  if (auto windowObjectOpt = windowObject();
+      windowObjectOpt.has_value() &&
+      windowObjectOpt->contains(Keys::background) &&
+      windowObjectOpt->value(Keys::background).isString()) {
+    return windowObjectOpt->value(Keys::background).toString();
   }
+
+  return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
 double Base::scaleFactor() const {

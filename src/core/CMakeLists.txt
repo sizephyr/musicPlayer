@@ -20,7 +20,6 @@ target_link_libraries(
   core
   PRIVATE Qt6::Gui
           Qt6::Quick
-          yaml-cpp::yaml-cpp
           commonplugin
           configurationplugin
           common_lib

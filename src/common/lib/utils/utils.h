@@ -4,6 +4,7 @@
 #include <QJsonObject>
 #include <chrono>
 #include <expected>
+#include <filesystem>
 
 namespace Utils {
 
@@ -14,7 +15,9 @@ std::chrono::year_month_day toChrono(QDate);
 
 namespace JSON {
 std::expected<QJsonObject, QJsonParseError> parseQJsonObject(
-    const QByteArray &rawJSO);
-}
+    const QByteArray& rawJSO);
+std::expected<QJsonObject, QString> readJsonFile(
+    const std::filesystem::path& filePath);
+}  // namespace JSON
 
 }  // namespace Utils

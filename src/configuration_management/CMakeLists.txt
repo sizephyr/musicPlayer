@@ -1,12 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 project(Configuration LANGUAGES CXX)
 
-FetchContent_Declare(
-  yaml-cpp
-  GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
-  GIT_TAG yaml-cpp-0.9.0)
-FetchContent_MakeAvailable(yaml-cpp)
-
 qt_policy(SET QTP0001 NEW)
 
 add_subdirectory(themes)
@@ -33,8 +27,7 @@ option(MAKE_DEFAULT_CONFIG "Собрать конфигурацию по-умо�
 
 include(${CMAKE_SOURCE_DIR}/cmake/make_default_application_config.cmake)
 
-target_link_libraries(configuration PRIVATE themesplugin yaml-cpp::yaml-cpp
-                                            common_lib)
+target_link_libraries(configuration PRIVATE themesplugin common_lib)
 
 target_include_directories(configurationplugin
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

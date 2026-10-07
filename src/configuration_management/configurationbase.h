@@ -1,7 +1,6 @@
 #pragma once
 
-#include <yaml-cpp/yaml.h>
-
+#include <QJsonObject>
 #include <QObject>
 #include <QQmlEngine>
 #include <QSize>
@@ -26,7 +25,6 @@ class Base : public QObject {
   [[nodiscard]] Q_INVOKABLE int notificationHideAfterMs() const;
   [[nodiscard]] Q_INVOKABLE QString windowBackground() const;
 
-  [[nodiscard]] bool connectionConfigured() const;
   [[nodiscard]] double scaleFactor() const;
 
  signals:
@@ -39,11 +37,13 @@ class Base : public QObject {
   getApplicationConfigPath();
   [[nodiscard]] static std::expected<std::filesystem::path, QString>
   getNetworkConfigPath();
-  [[nodiscard]] static std::expected<void, QString> parseNetworkConfig(
-      const YAML::Node&);
+
+  [[nodiscard]] std::optional<QJsonObject> windowObject() const;
+  [[nodiscard]] std::optional<QJsonObject> animationObject() const;
+  [[nodiscard]] std::optional<QJsonObject> networkObject() const;
 
   std::optional<QSize> _displaySize;
-  YAML::Node _applicationConfigRoot;
+  QJsonObject _rawApplicationConfig;
 };
 
 }  // namespace Configuration
