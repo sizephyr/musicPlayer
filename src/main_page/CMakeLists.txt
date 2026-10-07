@@ -13,13 +13,24 @@ qt_add_qml_module(
   STATIC
   QML_FILES
   MainPage.qml
+  PlayProgressBar.qml
+  PlayList.qml
+  PlayContext.qml
+  ActiveDirectoryDialog.qml
   SOURCES
   mainpagemodel.h
   mainpagemodel.cpp
-  QML_FILES PlayProgressBar.qml)
+  playlistmodel.h
+  playlistmodel.cpp)
 
 target_link_libraries(
-  main_page PRIVATE Qt6::Gui Qt6::Quick Qt6::Qml commonplugin
-                    configurationplugin page_managerplugin)
+  main_page
+  PRIVATE Qt6::Gui
+          Qt6::Quick
+          Qt6::Qml
+          commonplugin
+          common_lib
+          configurationplugin
+          page_managerplugin)
 
 target_include_directories(main_pageplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

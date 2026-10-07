@@ -18,18 +18,18 @@ auto parseSynchsafeInt = [](const char* bytes) -> int {
 };
 }  // namespace
 
-FileManageBackend::FileManageBackend(QObject* parent) : QObject{parent} {}
-
-QStringList FileManageBackend::fileSearch(const QString& path) {
-  const QString directoryPath = QUrl(path).toLocalFile();
+std::expected<QList<std::filesystem::path>, QString>
+FileManageBackend::filesSearch(const QString& path) {
+  const std::filesystem::path directoryPath =
+      QUrl(path).toLocalFile().toStdString();
 
   qCDebug(loggingCategory) << "Original path:" << path;
   qCDebug(loggingCategory) << "Converted directory path:" << directoryPath;
 
   const QDir directory(directoryPath);
   if (!directory.exists()) {
-    qCWarning(loggingCategory) << "Directory does not exist:" << directoryPath;
-    return {};
+    return std::unexpected(QStringLiteral("Directory does not exist: ") +
+                           directoryPath.c_str());
   }
 
   const QStringList entries =
@@ -38,33 +38,23 @@ QStringList FileManageBackend::fileSearch(const QString& path) {
   qCDebug(loggingCategory) << "Files found:" << entries;
 
   if (entries.isEmpty()) {
-    qCWarning(loggingCategory) << "No MP3 files found in directory.";
-    return {};
+    return std::unexpected(QStringLiteral("No MP3 files found in directory."));
   }
 
-  QStringList result;
+  QList<std::filesystem::path> result;
   result.reserve(entries.size());
-
-  for (const QString& entry : entries) {
-    result.append(entry);
-    qCDebug(loggingCategory) << "Added file name:" << entry;
-  }
+  std::ranges::transform(entries, std::back_inserter(result),
+                         [directoryPath](const auto& entry) {
+                           return directoryPath / entry.toStdString();
+                         });
 
   return result;
 }
 
-void FileManageBackend::parseMp3(const QString& filePath) {
-  parseID3(filePath);
-  emit titleChanged();
-  emit artistChanged();
-  emit coverImagePathChanged();
+std::optional<Common::Mp3Description> FileManageBackend::parseMp3(
+    const std::filesystem::path& filePath) {
+  return parseID3(filePath);
 }
-
-QString FileManageBackend::title() const { return _title; }
-
-QString FileManageBackend::artist() const { return _artist; }
-
-QString FileManageBackend::coverImagePath() const { return _coverImagePath; }
 
 QString decodeText(const QByteArray& data) {
   if (data.isEmpty()) {
@@ -97,25 +87,27 @@ QString decodeText(const QByteArray& data) {
   return QString::fromLatin1(textData);
 }
 
-void FileManageBackend::parseID3(const QString& filePath) {
-  _coverImagePath.clear();
-
+std::optional<Common::Mp3Description> FileManageBackend::parseID3(
+    const std::filesystem::path& filePath) {
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly)) {
     qCWarning(loggingCategory) << "Cannot open file for reading:" << filePath;
-    return;
+    return std::nullopt;
   }
 
   QByteArray header = file.read(10);
   if (header.size() < 10 || !header.startsWith("ID3")) {
     qCWarning(loggingCategory) << "No ID3 tag found in file:" << filePath;
-    return;
+    return std::nullopt;
   }
 
   const int tagSize = parseSynchsafeInt(header.constData() + 6);
   const QByteArray tagData = file.read(tagSize);
 
   int pos = 0;
+  std::optional<QUrl> coverImagePath;
+  std::optional<Common::Mp3DescriptionTypes::TrackTitle> trackTitle;
+  std::optional<Common::Mp3DescriptionTypes::TrackArtist> TrackArtist;
   while (pos < tagSize) {
     if (pos + 10 > tagData.size()) {
       qCWarning(loggingCategory)
@@ -137,28 +129,41 @@ void FileManageBackend::parseID3(const QString& filePath) {
     const QByteArrayView frameData(frameHeaderPtr + 10, frameSize);
 
     if (frameID == "TIT2") {
-      _title = decodeText(frameData.toByteArray());
+      trackTitle = Common::Mp3DescriptionTypes::TrackTitle(
+          decodeText(frameData.toByteArray()));
     } else if (frameID == "TPE1") {
-      _artist = decodeText(frameData.toByteArray());
+      TrackArtist = Common::Mp3DescriptionTypes::TrackArtist(
+          decodeText(frameData.toByteArray()));
     } else if (frameID == "APIC") {
-      processApicFrame(frameData);
+      coverImagePath = getCoverImagePath(frameData);
     }
 
     pos += 10 + frameSize;
   }
+
+  if (trackTitle.has_value() && TrackArtist.has_value()) {
+    return Common::Mp3Description(trackTitle.value(), TrackArtist.value(),
+                                  coverImagePath);
+  }
+  return std::nullopt;
 }
 
-void FileManageBackend::processApicFrame(QByteArrayView frameData) {
+std::optional<QUrl> FileManageBackend::getCoverImagePath(
+    QByteArrayView frameData) {
   // В APIC-фрейме сначала идет Text Encoding (1 байт)
   const int mimeTypeEnd = frameData.indexOf('\0', 1);
-  if (mimeTypeEnd == -1) return;
+  if (mimeTypeEnd == -1) {
+    return std::nullopt;
+  }
 
   const QString mimeType =
       QString::fromLatin1(frameData.slice(1, mimeTypeEnd - 1));
 
   // Пропускаем MIME-тип и '\0', ищем конец описания картинки (Description)
   const int descriptionEnd = frameData.indexOf('\0', mimeTypeEnd + 1);
-  if (descriptionEnd == -1) return;
+  if (descriptionEnd == -1) {
+    return std::nullopt;
+  }
 
   const auto imageData = frameData.sliced(descriptionEnd + 1);
   const char* format = nullptr;
@@ -170,22 +175,22 @@ void FileManageBackend::processApicFrame(QByteArrayView frameData) {
   else {
     qCWarning(loggingCategory)
         << "Unsupported image format in APIC frame:" << mimeType;
-    return;
+    return std::nullopt;
   }
 
   QImage coverImage;
   if (!coverImage.loadFromData(reinterpret_cast<const uchar*>(imageData.data()),
                                imageData.size(), format)) {
     qCWarning(loggingCategory) << "Failed to load image from APIC frame";
-    return;
+    return std::nullopt;
   }
 
   const QString tempPath = QDir::tempPath() + QStringLiteral("/coverImage.jpg");
   if (!coverImage.save(tempPath, "JPEG")) {
     qCWarning(loggingCategory)
         << "Failed to save cover image to temporary path";
-    return;
+    return std::nullopt;
   }
 
-  _coverImagePath = QStringLiteral("file://") + tempPath;
+  return QUrl::fromLocalFile(tempPath);
 }

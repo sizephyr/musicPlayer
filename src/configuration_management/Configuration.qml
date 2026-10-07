@@ -27,9 +27,9 @@ ConfigurationBase {
     readonly property int r4Radius: scale(15)
     readonly property int r5Radius: scale(10)
 
-    readonly property int primaryTextPointSize: scale(35) // осбоважный укрупнённый текст
-    readonly property int regularTextPointSize: scale(30) // базовый текст
-    readonly property int secondaryTextPointSize: scale(25) // второстепенный текст
+    readonly property int primaryTextPointSize: scale(30) // осбоважный укрупнённый текст
+    readonly property int regularTextPointSize: scale(20) // базовый текст
+    readonly property int secondaryTextPointSize: scale(15) // второстепенный текст
 
     readonly property string baseFontFamily: "Times New Roman"
 }

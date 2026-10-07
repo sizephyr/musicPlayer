@@ -30,7 +30,11 @@ qt_add_library(
   httpcode.h
   httpcode.cpp
   httpheader.h
-  httpheader.cpp)
+  httpheader.cpp
+  filemanagebackend.h
+  filemanagebackend.cpp
+  mp3description.h
+  mp3description.cpp)
 
 qt_add_qml_module(
   common_lib
@@ -41,9 +45,7 @@ qt_add_qml_module(
   OUTPUT_DIRECTORY
   "${CMAKE_BINARY_DIR}/src/qml/modules/common/lib"
   SOURCES
-  statuslabel.h
-  filemanagebackend.h
-  filemanagebackend.cpp)
+  statuslabel.h)
 
 target_link_libraries(common_lib PRIVATE Qt6::Core Qt6::Quick Qt6::Multimedia
                                          TagLib::TagLib ZLIB::ZLIB)

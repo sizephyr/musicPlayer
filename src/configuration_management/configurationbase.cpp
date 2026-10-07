@@ -13,7 +13,7 @@ const auto loggingCategory = QLoggingCategory("configuration.base");
 constinit const auto defaultAnimationDuration = std::chrono::milliseconds(250);
 constinit const auto defaultNotificationHideAfterMs =
     std::chrono::milliseconds(4000);
-constinit const auto referenceDisplaySize = QSize(1920, 1080);
+constinit const auto referenceDisplaySize = QSize(1000, 600);
 
 constinit const auto applicationConfigFilename = "ApplicationConfig.json";
 constinit const auto networkConfigFilename = "NetworkConfig.json";
