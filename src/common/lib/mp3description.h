@@ -5,6 +5,7 @@
 #include <QString>
 #include <QUrl>
 #include <QUuid>
+#include <filesystem>
 
 namespace Common {
 
@@ -15,7 +16,7 @@ using TrackArtist = StringEntityId<struct TrackArtistTag>;
 
 class Mp3Description {
  public:
-  Mp3Description(Mp3DescriptionTypes::TrackTitle,
+  Mp3Description(std::filesystem::path, Mp3DescriptionTypes::TrackTitle,
                  Mp3DescriptionTypes::TrackArtist,
                  std::optional<QUrl> = std::nullopt);
 
@@ -26,6 +27,7 @@ class Mp3Description {
 
  private:
   QUuid _uid;
+  std::filesystem::path _path;
   Mp3DescriptionTypes::TrackTitle _title;
   Mp3DescriptionTypes::TrackArtist _artist;
   std::optional<QUrl> _coverImagePath;

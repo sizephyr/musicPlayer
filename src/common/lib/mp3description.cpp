@@ -2,10 +2,12 @@
 
 namespace Common {
 
-Mp3Description::Mp3Description(Mp3DescriptionTypes::TrackTitle title,
+Mp3Description::Mp3Description(std::filesystem::path path,
+                               Mp3DescriptionTypes::TrackTitle title,
                                Mp3DescriptionTypes::TrackArtist artist,
                                std::optional<QUrl> coverImagePath)
     : _uid(QUuid::createUuid()),
+      _path(std::move(path)),
       _title(std::move(title)),
       _artist(std::move(artist)),
       _coverImagePath(std::move(coverImagePath)) {}

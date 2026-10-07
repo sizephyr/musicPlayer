@@ -12,9 +12,18 @@
 namespace {
 const auto loggingCategory = QLoggingCategory("file_manage_backend");
 
+// Оставляем ТОЛЬКО для заголовка ID3v2
 auto parseSynchsafeInt = [](const char* bytes) -> int {
   return ((bytes[0] & 0x7F) << 21) | ((bytes[1] & 0x7F) << 14) |
          ((bytes[2] & 0x7F) << 7) | (bytes[3] & 0x7F);
+};
+
+// Добавляем для размеров фреймов (ID3v2.3)
+auto parseNormalInt = [](const char* bytes) -> int {
+  return (static_cast<unsigned char>(bytes[0]) << 24) |
+         (static_cast<unsigned char>(bytes[1]) << 16) |
+         (static_cast<unsigned char>(bytes[2]) << 8) |
+         static_cast<unsigned char>(bytes[3]);
 };
 }  // namespace
 
@@ -61,30 +70,31 @@ QString decodeText(const QByteArray& data) {
     return QString();
   }
 
-  // Check encoding byte
   char encoding = data[0];
   QByteArray textData = data.mid(1);
+  QString result;
 
   if (encoding == 0) {
-    // ISO-8859-1
-    return QString::fromLatin1(textData);
+    result = QString::fromLatin1(textData);
   } else if (encoding == 1) {
-    // UTF-16 with BOM
-    return QString::fromUtf16(
+    result = QString::fromUtf16(
         reinterpret_cast<const char16_t*>(textData.constData() + 2),
         (textData.size() - 2) / 2);
   } else if (encoding == 2) {
-    // UTF-16BE without BOM
-    return QString::fromUtf16(
+    result = QString::fromUtf16(
         reinterpret_cast<const char16_t*>(textData.constData()),
         textData.size() / 2);
   } else if (encoding == 3) {
-    // UTF-8
-    return QString::fromUtf8(textData);
+    result = QString::fromUtf8(textData);
+  } else {
+    result = QString::fromLatin1(textData);
   }
 
-  // Default to ISO-8859-1 if encoding is unknown
-  return QString::fromLatin1(textData);
+  while (!result.isEmpty() && result.endsWith(QChar('\0'))) {
+    result.chop(1);
+  }
+
+  return result.trimmed();
 }
 
 std::optional<Common::Mp3Description> FileManageBackend::parseID3(
@@ -116,7 +126,7 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
     }
 
     const char* frameHeaderPtr = tagData.constData() + pos;
-    const int frameSize = parseSynchsafeInt(frameHeaderPtr + 4);
+    const int frameSize = parseNormalInt(frameHeaderPtr + 4);
 
     if (pos + 10 + frameSize > tagData.size()) {
       qCWarning(loggingCategory) << "Incomplete frame data at position:" << pos;
@@ -142,8 +152,8 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
   }
 
   if (trackTitle.has_value() && TrackArtist.has_value()) {
-    return Common::Mp3Description(trackTitle.value(), TrackArtist.value(),
-                                  coverImagePath);
+    return Common::Mp3Description(filePath, trackTitle.value(),
+                                  TrackArtist.value(), coverImagePath);
   }
   return std::nullopt;
 }
