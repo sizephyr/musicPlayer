@@ -66,14 +66,4 @@ Rectangle {
             color: Configuration.theme.lightGrayColor
         }
     }
-
-    PropertyAnimation {
-        target: playProgressBar
-        property: "progress"
-        from: playProgressBar.progressBegin
-        to: 1.0
-        duration: 10000
-        running: true
-        loops: Animation.Infinite
-    }
 }

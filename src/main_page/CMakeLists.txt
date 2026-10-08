@@ -25,7 +25,8 @@ qt_add_qml_module(
   SOURCES
   playcontextmodel.h
   playcontextmodel.cpp
-  QML_FILES PlayListItem.qml)
+  QML_FILES PlayListItem.qml
+  QML_FILES SomeMediaPlayer.qml)
 
 target_link_libraries(
   main_page

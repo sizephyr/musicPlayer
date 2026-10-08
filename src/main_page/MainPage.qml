@@ -1,7 +1,5 @@
 import QtQuick
-import QtQuick.Dialogs
 import QtQuick.Layouts
-import QtMultimedia
 import modules.common
 import modules.configuration
 import modules.main_page
@@ -15,6 +13,7 @@ BaseActionBackgroundRect {
     }
 
     property MainPageModel model: MainPageModel {}
+    property SomeMediaPlayer mediaPlayer: SomeMediaPlayer {}
 
     RowLayout {
         anchors.fill: parent
@@ -23,6 +22,7 @@ BaseActionBackgroundRect {
         PlayContext {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            progress: root.mediaPlayer.progressRatio
         }
         PlayList {
             Layout.fillHeight: true
@@ -31,24 +31,9 @@ BaseActionBackgroundRect {
             model: root.model.playListModel
 
             onSelected: uid => {
-                mediaPlayer.source = "file://" + root.model.trackPathOf(uid);
-                mediaPlayer.play();
+                root.mediaPlayer.source = "file://" + root.model.trackPathOf(uid);
+                root.mediaPlayer.play();
             }
-        }
-    }
-
-    MediaPlayer {
-        id: mediaPlayer
-        // source: "file:///path/to/your/audio.mp3"
-
-        audioOutput: AudioOutput {
-            // TODO: привязать значение из ProgressBar
-            // volume: volumeSlider.value
-            volume: 0.5
-        }
-
-        onErrorOccurred: (error, errorString) => {
-            console.log("Ошибка воспроизведения: " + errorString);
         }
     }
 
