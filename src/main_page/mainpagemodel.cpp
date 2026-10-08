@@ -42,4 +42,11 @@ void Model::onCurrentPlayFolderChanged() {
 
 PlayListModel* Model::playListModel() const { return _playListModel; }
 
+QString Model::trackPathOf(QUuid trackUid) {
+  if (auto descrOpt = _playListModel->mp3DescriptionByTrackUid(trackUid)) {
+    return descrOpt->path().c_str();
+  }
+  return "";
+}
+
 }  // namespace MainPage

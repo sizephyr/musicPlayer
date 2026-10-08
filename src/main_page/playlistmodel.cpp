@@ -1,9 +1,15 @@
 #include "playlistmodel.h"
 
+#include <ranges>
+
 namespace {
-const auto trackTitleRoleName = "trackTitle";
-const auto trackArtistRoleName = "trackArtist";
-const auto coverImagePathRoleName = "coverImagePath";
+namespace RoleNames {
+const auto uid = "uid";
+const auto path = "path";
+const auto trackTitle = "trackTitle";
+const auto trackArtist = "trackArtist";
+const auto coverImagePath = "coverImagePath";
+}  // namespace RoleNames
 }  // namespace
 
 PlayListModel::PlayListModel(QObject* parent) : QAbstractListModel{parent} {}
@@ -22,6 +28,10 @@ int PlayListModel::rowCount(const QModelIndex& parent) const {
 
 QVariant PlayListModel::data(const QModelIndex& index, int role) const {
   switch (role) {
+    case Uid:
+      return QVariant::fromValue(_container[index.row()].uid());
+    case Path:
+      return QVariant::fromValue(_container[index.row()].path().c_str());
     case TrackTitle:
       return QVariant::fromValue(_container[index.row()].title().value);
     case TrackArtist:
@@ -36,8 +46,22 @@ QVariant PlayListModel::data(const QModelIndex& index, int role) const {
 
 QHash<int, QByteArray> PlayListModel::roleNames() const {
   return {
-      {TrackTitle, trackTitleRoleName},
-      {TrackArtist, trackArtistRoleName},
-      {CoverImagePath, coverImagePathRoleName},
+      {Uid, RoleNames::uid},
+      {Path, RoleNames::path},
+      {TrackTitle, RoleNames::trackTitle},
+      {TrackArtist, RoleNames::trackArtist},
+      {CoverImagePath, RoleNames::coverImagePath},
   };
+}
+
+std::optional<Common::Mp3Description> PlayListModel::mp3DescriptionByTrackUid(
+    QUuid uid) const {
+  auto findResult = std::ranges::find_if(
+      _container,
+      [uid](const auto& description) { return description.uid() == uid; });
+
+  if (findResult == _container.end()) {
+    return std::nullopt;
+  }
+  return *findResult;
 }

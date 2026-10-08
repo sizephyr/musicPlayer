@@ -14,6 +14,8 @@ Mp3Description::Mp3Description(std::filesystem::path path,
 
 QUuid Mp3Description::uid() const { return _uid; }
 
+std::filesystem::path Mp3Description::path() const { return _path; }
+
 Mp3DescriptionTypes::TrackTitle Mp3Description::title() const { return _title; }
 
 Mp3DescriptionTypes::TrackArtist Mp3Description::artist() const {

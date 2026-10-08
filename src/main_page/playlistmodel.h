@@ -12,7 +12,9 @@ class PlayListModel : public QAbstractListModel {
 
  public:
   enum ItemContentRole {
-    TrackTitle = Qt::UserRole + 1,
+    Uid = Qt::UserRole + 1,
+    Path,
+    TrackTitle,
     TrackArtist,
     CoverImagePath,
   };
@@ -26,6 +28,9 @@ class PlayListModel : public QAbstractListModel {
       const QModelIndex& parent = QModelIndex()) const override;
   virtual QVariant data(const QModelIndex& index, int role) const override;
   virtual QHash<int, QByteArray> roleNames() const override;
+
+  [[nodiscard]] std::optional<Common::Mp3Description> mp3DescriptionByTrackUid(
+      QUuid) const;
 
  signals:
 

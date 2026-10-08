@@ -18,6 +18,7 @@ find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
 find_package(TagLib REQUIRED)
 find_package(ZLIB REQUIRED)
 include(cmake/define_version_h.cmake)
+include(cmake/fetch_qcoro.cmake)
 
 qt_standard_project_setup(REQUIRES 6.11)
 

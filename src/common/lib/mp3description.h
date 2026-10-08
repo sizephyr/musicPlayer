@@ -20,10 +20,11 @@ class Mp3Description {
                  Mp3DescriptionTypes::TrackArtist,
                  std::optional<QUrl> = std::nullopt);
 
-  QUuid uid() const;
-  Mp3DescriptionTypes::TrackTitle title() const;
-  Mp3DescriptionTypes::TrackArtist artist() const;
-  std::optional<QUrl> coverImagePath() const;
+  [[nodiscard]] QUuid uid() const;
+  [[nodiscard]] std::filesystem::path path() const;
+  [[nodiscard]] Mp3DescriptionTypes::TrackTitle title() const;
+  [[nodiscard]] Mp3DescriptionTypes::TrackArtist artist() const;
+  [[nodiscard]] std::optional<QUrl> coverImagePath() const;
 
  private:
   QUuid _uid;

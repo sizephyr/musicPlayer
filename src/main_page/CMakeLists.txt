@@ -21,7 +21,11 @@ qt_add_qml_module(
   mainpagemodel.h
   mainpagemodel.cpp
   playlistmodel.h
-  playlistmodel.cpp)
+  playlistmodel.cpp
+  SOURCES
+  playcontextmodel.h
+  playcontextmodel.cpp
+  QML_FILES PlayListItem.qml)
 
 target_link_libraries(
   main_page

@@ -8,23 +8,23 @@ import modules.page_manager
 
 Rectangle {
     id: playProgressBar
-    
+
     Layout.preferredHeight: 10
-    
+
     border.width: 2
     border.color: Configuration.theme.semiTransparentMutedWhiteColor
     radius: Configuration.r3Radius
-    
+
     readonly property double progressBegin: 0.0
     property double progress: 0.0 // 0.0-1.0
-    
+
     function calculateBoundWidth() {
         const p = Math.max(0.0, Math.min(1.0, progress));
-        
+
         const leftProgressControlPoint = 0.2;
         const rightProgressControlPoint = 0.9;
         const targetMax = 0.1;
-        
+
         if (p <= leftProgressControlPoint) {
             return (targetMax / leftProgressControlPoint) * p;
         } else if (p < rightProgressControlPoint) {
@@ -33,10 +33,10 @@ Rectangle {
             return (targetMax / (1.0 - rightProgressControlPoint)) * (1.0 - p);
         }
     }
-    
+
     gradient: Gradient {
         orientation: Gradient.Horizontal
-        
+
         GradientStop {
             position: playProgressBar.progressBegin
             color: Configuration.theme.darkGrayColor
@@ -56,7 +56,7 @@ Rectangle {
             id: notListenedBoundGS
             property double width: playProgressBar.calculateBoundWidth() / 2
             property double calculatedPosition: playProgressBar.progress + listenedBoundGS.width + width
-            
+
             position: Math.min(1.0, Math.max(0.0, calculatedPosition))
             color: Configuration.theme.lightGrayColor
         }
@@ -66,7 +66,7 @@ Rectangle {
             color: Configuration.theme.lightGrayColor
         }
     }
-    
+
     PropertyAnimation {
         target: playProgressBar
         property: "progress"

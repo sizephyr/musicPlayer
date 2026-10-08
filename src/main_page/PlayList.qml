@@ -10,6 +10,8 @@ Item {
 
     property var model
 
+    signal selected(var trackUid)
+
     Rectangle {
         anchors.fill: parent
         anchors.margins: Configuration.scale(100)
@@ -30,28 +32,21 @@ Item {
 
             model: root.model
 
-            delegate: Label {
+            delegate: PlayListItem {
                 width: view.width
                 height: (view.height - view.anchors.margins * 2) / 7
-                verticalAlignment: Text.AlignVCenter
                 leftPadding: view.anchors.margins
-
                 text: model.trackArtist + " - " + model.trackTitle
-                font.pointSize: Configuration.regularTextPointSize
-                color: Configuration.theme.darkGrayColor
 
-                background: Rectangle {
-                    border.width: 1
-                    border.color: Configuration.theme.semiTransparentLightGrayColor
-                    color: "transparent"
-                    radius: Configuration.r5Radius
+                onSelectedChanged: {
+                    if (selected)
+                        root.selected(model.uid);
                 }
+                Connections {
+                    target: root
 
-                Button {
-                    anchors.fill: parent
-                    background: Rectangle {
-                        color: "transparent"
-                        radius: Configuration.r5Radius
+                    function onSelected(uid) {
+                        selected = (model.uid === uid);
                     }
                 }
             }

@@ -22,6 +22,7 @@ class Model : public QObject {
   void setCurrentPlayFolder(const QString& newCurrentPlayFolder);
 
   PlayListModel* playListModel() const;
+  [[nodiscard]] Q_INVOKABLE QString trackPathOf(QUuid);
 
  signals:
   void currentPlayFolderChanged();
