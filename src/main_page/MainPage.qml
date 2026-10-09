@@ -3,16 +3,17 @@ import QtQuick.Layouts
 import modules.common
 import modules.configuration
 import modules.main_page
+import QtMultimedia
 
 BaseActionBackgroundRect {
     id: root
     clip: true
 
-    Component.onCompleted: {
-        activeDirectoryDialog.show();
+    property MainPageModel model: MainPageModel {
+        onCoverProvided: coverPathString => {
+            playContext.coverSource = "file://" + coverPathString;
+        }
     }
-
-    property MainPageModel model: MainPageModel {}
     property SomeMediaPlayer mediaPlayer: SomeMediaPlayer {}
 
     RowLayout {
@@ -20,6 +21,7 @@ BaseActionBackgroundRect {
         spacing: Configuration.scale(100)
 
         PlayContext {
+            id: playContext
             Layout.fillHeight: true
             Layout.fillWidth: true
             progress: root.mediaPlayer.progressRatio
@@ -32,7 +34,14 @@ BaseActionBackgroundRect {
 
             onSelected: uid => {
                 root.mediaPlayer.source = "file://" + root.model.trackPathOf(uid);
+                root.model.provideCoverFor(uid);
                 root.mediaPlayer.play();
+            }
+
+            OpenCurrentFolderBtn {
+                id: openCurrentFolderBtn
+                anchors.centerIn: parent
+                onClicked: activeDirectoryDialog.show()
             }
         }
     }

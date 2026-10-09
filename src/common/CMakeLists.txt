@@ -30,9 +30,9 @@ qt_add_qml_module(
   basebuttonstyle.h
   pageclosingcontext.h
   RESOURCES
-  img/unknown_icon_pic.png
-  img/append_pic.png
-  img/search_bar_magnifier_pic.png)
+  ../../img/unknown_icon_pic.png
+  ../../img/append_pic.png
+  ../../img/search_bar_magnifier_pic.png)
 
 target_link_libraries(common PRIVATE Qt6::Gui Qt6::Quick configurationplugin
                                      common_lib)

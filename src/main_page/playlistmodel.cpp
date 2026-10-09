@@ -38,7 +38,7 @@ QVariant PlayListModel::data(const QModelIndex& index, int role) const {
       return QVariant::fromValue(_container[index.row()].artist().value);
     case CoverImagePath:
       return QVariant::fromValue(
-          _container[index.row()].coverImagePath().value_or(QUrl()).toString());
+          _container[index.row()].coverImagePath().value_or("").c_str());
     default:
       return QVariant();
   }
@@ -64,4 +64,15 @@ std::optional<Common::Mp3Description> PlayListModel::mp3DescriptionByTrackUid(
     return std::nullopt;
   }
   return *findResult;
+}
+
+void PlayListModel::modifyDescr(
+    QUuid trackUid, std::function<void(Common::Mp3Description&)> updater) {
+  // будет найдено единственное описание
+  auto targetTracks =
+      _container | std::views::filter([trackUid](const auto& descr) {
+        return descr.uid() == trackUid;
+      });
+  // но применим так, будто их много, просто потому что так кода меньше)
+  std::ranges::for_each(targetTracks, updater);
 }

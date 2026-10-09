@@ -18,20 +18,23 @@ class Mp3Description {
  public:
   Mp3Description(std::filesystem::path, Mp3DescriptionTypes::TrackTitle,
                  Mp3DescriptionTypes::TrackArtist,
-                 std::optional<QUrl> = std::nullopt);
+                 std::optional<std::filesystem::path> = std::nullopt);
 
   [[nodiscard]] QUuid uid() const;
   [[nodiscard]] std::filesystem::path path() const;
   [[nodiscard]] Mp3DescriptionTypes::TrackTitle title() const;
   [[nodiscard]] Mp3DescriptionTypes::TrackArtist artist() const;
-  [[nodiscard]] std::optional<QUrl> coverImagePath() const;
+  [[nodiscard]] std::optional<std::filesystem::path> coverImagePath() const;
+
+  void setCoverImagePath(
+      std::optional<std::filesystem::path> newCoverImagePath);
 
  private:
   QUuid _uid;
   std::filesystem::path _path;
   Mp3DescriptionTypes::TrackTitle _title;
   Mp3DescriptionTypes::TrackArtist _artist;
-  std::optional<QUrl> _coverImagePath;
+  std::optional<std::filesystem::path> _coverImagePath;
 };
 
 }  // namespace Common

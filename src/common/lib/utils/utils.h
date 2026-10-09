@@ -20,4 +20,9 @@ std::expected<QJsonObject, QString> readJsonFile(
     const std::filesystem::path& filePath);
 }  // namespace JSON
 
+namespace Image {
+std::expected<std::filesystem::path, QString> saveImageToTemp(
+    const QString& filename, const QImage& image);
+}  // namespace Image
+
 }  // namespace Utils

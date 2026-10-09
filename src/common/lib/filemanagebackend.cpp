@@ -1,12 +1,15 @@
 #include "filemanagebackend.h"
 
 #include <QBuffer>
+#include <QCoroProcess>
 #include <QDataStream>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QImage>
 #include <QLoggingCategory>
+#include <QProcess>
+#include <QStandardPaths>
 #include <QUrl>
 
 namespace {
@@ -115,7 +118,7 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
   const QByteArray tagData = file.read(tagSize);
 
   int pos = 0;
-  std::optional<QUrl> coverImagePath;
+  std::optional<std::filesystem::path> coverImagePath;
   std::optional<Common::Mp3DescriptionTypes::TrackTitle> trackTitle;
   std::optional<Common::Mp3DescriptionTypes::TrackArtist> TrackArtist;
   while (pos < tagSize) {
@@ -158,7 +161,7 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
   return std::nullopt;
 }
 
-std::optional<QUrl> FileManageBackend::getCoverImagePath(
+std::optional<std::filesystem::path> FileManageBackend::getCoverImagePath(
     QByteArrayView frameData) {
   // В APIC-фрейме сначала идет Text Encoding (1 байт)
   const int mimeTypeEnd = frameData.indexOf('\0', 1);
@@ -202,5 +205,48 @@ std::optional<QUrl> FileManageBackend::getCoverImagePath(
     return std::nullopt;
   }
 
-  return QUrl::fromLocalFile(tempPath);
+  return std::filesystem::path(tempPath.toStdString());
+}
+
+QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
+    Common::Mp3Description& descr) {
+  QProcess process;
+
+  // Исправлено формирование пути: расширение .png добавлено в саму строку
+  // формата
+  const auto targetImagePath =
+      QStringLiteral("%1/%2.png")
+          .arg(QStandardPaths::writableLocation(QStandardPaths::TempLocation),
+               descr.uid().toString(QUuid::WithoutBraces));
+
+  // Настраиваем исполняемый файл и аргументы команды
+  process.setProgram(QStringLiteral("ffmpeg"));
+  process.setArguments({
+      QStringLiteral("-y"),  // Принудительная перезапись без вопросов!
+      QStringLiteral("-i"),
+      descr.path().c_str(),
+      QStringLiteral("-map"),
+      QStringLiteral("0:v:0"),
+      QStringLiteral("-c:v"),
+      QStringLiteral("copy"),
+      QStringLiteral("-update"),
+      QStringLiteral("1"),
+      targetImagePath,
+  });
+
+  process.start();
+
+  if (!co_await qCoro(process).waitForStarted()) {
+    qWarning() << "Не удалось запустить процесс ffmpeg!";
+    co_return;
+  }
+
+  co_await qCoro(process).waitForFinished();
+
+  // Проверяем результаты выполнения
+  if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
+    descr.setCoverImagePath(targetImagePath.toStdString());
+  } else {
+    qWarning() << "Ошибка выполнения ffmpeg:" << process.readAllStandardError();
+  }
 }

@@ -2,10 +2,14 @@
 
 #include <playlistmodel.h>
 
+#include <QCoroTask>
+#include <QImage>
+#include <QMediaMetaData>
 #include <QObject>
 #include <QQmlEngine>
 
 namespace MainPage {
+class CoverProvider;
 
 class Model : public QObject {
   Q_OBJECT
@@ -24,10 +28,13 @@ class Model : public QObject {
   PlayListModel* playListModel() const;
   [[nodiscard]] Q_INVOKABLE QString trackPathOf(QUuid);
 
+ public slots:
+  [[nodiscard]] QCoro::Task<> provideCoverFor(QUuid);
+
  signals:
   void currentPlayFolderChanged();
-
   void playListModelChanged();
+  void coverProvided(const QString&);
 
  private slots:
   void onCurrentPlayFolderChanged();

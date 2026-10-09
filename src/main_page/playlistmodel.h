@@ -31,6 +31,8 @@ class PlayListModel : public QAbstractListModel {
 
   [[nodiscard]] std::optional<Common::Mp3Description> mp3DescriptionByTrackUid(
       QUuid) const;
+  /// \attention \todo функция не регистрирует изменения в модели!
+  void modifyDescr(QUuid, std::function<void(Common::Mp3Description&)>);
 
  signals:
 

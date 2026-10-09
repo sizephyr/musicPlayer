@@ -1,6 +1,7 @@
 #include "mainpagemodel.h"
 
 #include <filemanagebackend.h>
+#include <utils/utils.h>
 
 #include <QLoggingCategory>
 
@@ -28,7 +29,8 @@ void Model::onCurrentPlayFolderChanged() {
   if (auto filesListExp = FileManageBackend::filesSearch(_currentPlayFolder)) {
     for (const auto& filepath : filesListExp.value()) {
       if (auto fileDescriptionOpt = FileManageBackend::parseMp3(filepath)) {
-        _playListModel->pushBack(fileDescriptionOpt.value());
+        auto fileDescription = fileDescriptionOpt.value();
+        _playListModel->pushBack(fileDescription);
       } else {
         qCWarning(loggingCategory)
             << "Не удалось распарсить описание файла" << filepath.c_str();
@@ -47,6 +49,21 @@ QString Model::trackPathOf(QUuid trackUid) {
     return descrOpt->path().c_str();
   }
   return "";
+}
+
+QCoro::Task<> Model::provideCoverFor(QUuid trackUid) {
+  if (auto descr = _playListModel->mp3DescriptionByTrackUid(trackUid)) {
+    auto fileDescription = descr.value();
+    if (!fileDescription.coverImagePath().has_value()) {
+      // попытка изъять обложку с помощью ffmpeg, потому что она прячется
+      //  как долбанный видеопоток!
+      co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
+          fileDescription);
+    }
+    emit coverProvided(fileDescription.coverImagePath().value_or("").c_str());
+  } else {
+    emit coverProvided("");
+  }
 }
 
 }  // namespace MainPage

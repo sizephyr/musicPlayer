@@ -1,6 +1,8 @@
 #include "utils.h"
 
 #include <QFile>
+#include <QImage>
+#include <QTemporaryFile>
 
 namespace Utils {
 
@@ -50,6 +52,33 @@ std::expected<QJsonObject, QString> JSON::readJsonFile(
   }
 
   return doc.object();
+}
+
+std::expected<std::filesystem::path, QString> Image::saveImageToTemp(
+    const QString& filename, const QImage& image) {
+  if (image.isNull()) {
+    return std::unexpected("Изображение пустое!");
+  }
+
+  QTemporaryFile tempFile(filename);
+
+  if (!tempFile.open()) {
+    return std::unexpected("Не удалось создать временный файл:" +
+                           tempFile.errorString());
+  }
+
+  if (!image.save(&tempFile)) {
+    return std::unexpected("Не удалось сохранить QImage в файл.");
+  }
+
+  tempFile.setAutoRemove(false);
+
+  QString qtPath = tempFile.fileName();
+  qDebug() << "Файл сохранен:" << qtPath;
+
+  std::filesystem::path nativePath(qtPath.toStdString());
+
+  return nativePath;
 }
 
 }  // namespace Utils

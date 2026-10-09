@@ -48,6 +48,6 @@ qt_add_qml_module(
   statuslabel.h)
 
 target_link_libraries(common_lib PRIVATE Qt6::Core Qt6::Quick Qt6::Multimedia
-                                         TagLib::TagLib ZLIB::ZLIB)
+                                         QCoro6::Core TagLib::TagLib ZLIB::ZLIB)
 target_include_directories(common_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(common_lib PRIVATE "${CMAKE_BINARY_DIR}")

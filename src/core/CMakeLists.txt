@@ -20,6 +20,8 @@ target_link_libraries(
   core
   PRIVATE Qt6::Gui
           Qt6::Quick
+          Qt6::Multimedia
+          QCoro6::Core
           commonplugin
           configurationplugin
           common_lib

@@ -10,7 +10,6 @@ Item {
     id: root
 
     signal currentPlayFolderChanged(url folder)
-
     function show() {
         activeDirectoryDialog.active = true;
     }
@@ -36,6 +35,7 @@ Item {
 
                 onRejected: {
                     console.log("Выбор отменен");
+                    activeDirectoryDialog.active = false;
                 }
 
                 Component.onCompleted: {

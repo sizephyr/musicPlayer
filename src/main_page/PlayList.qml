@@ -1,18 +1,16 @@
 import QtQuick
-import QtQuick.Layouts
-import QtQuick.Controls.Basic
-import Qt5Compat.GraphicalEffects
-import modules.common
 import modules.configuration
 
 Item {
     id: root
 
     property var model
+    default property alias content: contentRect.data
 
     signal selected(var trackUid)
 
     Rectangle {
+        id: contentRect
         anchors.fill: parent
         anchors.margins: Configuration.scale(100)
         anchors.leftMargin: 0

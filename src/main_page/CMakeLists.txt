@@ -17,22 +17,27 @@ qt_add_qml_module(
   PlayList.qml
   PlayContext.qml
   ActiveDirectoryDialog.qml
+  PlayListItem.qml
+  SomeMediaPlayer.qml
+  OpenCurrentFolderBtn.qml
   SOURCES
   mainpagemodel.h
   mainpagemodel.cpp
   playlistmodel.h
   playlistmodel.cpp
-  SOURCES
   playcontextmodel.h
   playcontextmodel.cpp
-  QML_FILES PlayListItem.qml
-  QML_FILES SomeMediaPlayer.qml)
+  RESOURCES
+  ../../img/open-file.png
+  ../../img/unknown_icon_pic.png)
 
 target_link_libraries(
   main_page
   PRIVATE Qt6::Gui
           Qt6::Quick
           Qt6::Qml
+          Qt6::Multimedia
+          QCoro6::Core
           commonplugin
           common_lib
           configurationplugin
