@@ -7,6 +7,9 @@ import modules.main_page
 Item {
     id: root
 
+    // есть ли чё воспроизводить
+    property bool playContextAvailable: false
+
     property alias progress: playProgressBar.progress
     property alias coverSource: cover.source
 
@@ -33,7 +36,21 @@ Item {
                     border.color: Configuration.theme.semiTransparentMutedWhiteColor
                     color: Configuration.theme.semiTransparentLightGrayColor
                     radius: Configuration.r3Radius
-                    clip: true
+
+                    Image {
+                        id: coverMock // заглушка с вопросительным знаком, если нет обложки
+                        anchors.fill: parent
+                        anchors.margins: Configuration.scale(100)
+                        source: "img/unknown_icon_pic.png"
+
+                        layer.enabled: true
+                        layer.effect: MultiEffect {
+                            source: coverMock
+                            brightness: 1.0
+                            colorization: 1.0
+                            colorizationColor: Configuration.theme.darkGrayColor
+                        }
+                    }
 
                     Image {
                         id: cover
@@ -43,19 +60,26 @@ Item {
                     }
 
                     Rectangle {
-                        id: maskRectangle
-                        anchors.fill: parent
-                        anchors.margins: parent.border.width
-                        radius: Configuration.r3Radius
+                        id: coverMaskRectangle
+                        anchors.fill: cover
+                        radius: Math.max(0, parent.radius - parent.border.width)
+                        color: "black"
                         visible: false
+                        layer.enabled: true
                     }
 
                     MultiEffect {
                         anchors.fill: cover
-                        anchors.margins: parent.border.width
                         source: cover
                         maskEnabled: true
-                        maskSource: cover
+                        maskSource: coverMaskRectangle
+                    }
+
+                    PlayContextBasePlayingActions {
+                        anchors.fill: parent
+                        anchors.margins: parent.border.width
+                        visible: root.playContextAvailable && hoverHandler.hovered
+                        radiusCorrecting: parent.border.width
                     }
                 }
             }
@@ -65,5 +89,9 @@ Item {
                 Layout.fillWidth: true
             }
         }
+    }
+
+    HoverHandler {
+        id: hoverHandler
     }
 }

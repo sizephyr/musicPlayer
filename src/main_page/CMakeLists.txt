@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.16)
 project(main_page LANGUAGES CXX)
 
+set_source_files_properties(SomeMediaPlayer.qml PROPERTIES QT_QML_SINGLETON_TYPE
+                                                           TRUE)
+
 qt_policy(SET QTP0001 NEW)
 qt_add_qml_module(
   main_page
@@ -20,6 +23,7 @@ qt_add_qml_module(
   PlayListItem.qml
   SomeMediaPlayer.qml
   OpenCurrentFolderBtn.qml
+  PlayContextBasePlayingActions.qml
   SOURCES
   mainpagemodel.h
   mainpagemodel.cpp
@@ -29,7 +33,12 @@ qt_add_qml_module(
   playcontextmodel.cpp
   RESOURCES
   ../../img/open-file.png
-  ../../img/unknown_icon_pic.png)
+  ../../img/unknown_icon_pic.png
+  ../../img/play_pic.png
+  ../../img/pause_pic.png
+  ../../img/previous_track_pic.png
+  ../../img/next_track_pic.png
+  QML_FILES BasePlayingActionsButton.qml)
 
 target_link_libraries(
   main_page

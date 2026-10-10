@@ -11,10 +11,19 @@ BaseActionBackgroundRect {
 
     property MainPageModel model: MainPageModel {
         onCoverProvided: coverPathString => {
-            playContext.coverSource = "file://" + coverPathString;
+            if (coverPathString === "") {
+                playContext.coverSource = "";
+            } else {
+                playContext.coverSource = "file://" + coverPathString;
+            }
+        }
+        onCurrentPlayFolderChanged: {
+            if (root.model.currentPlayFolder === "") {
+                playContext.playContextAvailable = false;
+            }
         }
     }
-    property SomeMediaPlayer mediaPlayer: SomeMediaPlayer {}
+    property SomeMediaPlayer mediaPlayer: SomeMediaPlayer
 
     RowLayout {
         anchors.fill: parent
@@ -33,9 +42,15 @@ BaseActionBackgroundRect {
             model: root.model.playListModel
 
             onSelected: uid => {
-                root.mediaPlayer.source = "file://" + root.model.trackPathOf(uid);
-                root.model.provideCoverFor(uid);
-                root.mediaPlayer.play();
+                let trackPath = root.model.trackPathOf(uid);
+                if (trackPath !== "") {
+                    root.mediaPlayer.source = "file://" + trackPath;
+                    root.model.provideCoverFor(uid);
+                    root.mediaPlayer.play();
+                } else {
+                    playContext.coverSource = "";
+                    root.mediaPlayer.stop();
+                }
             }
 
             OpenCurrentFolderBtn {
@@ -50,6 +65,7 @@ BaseActionBackgroundRect {
         id: activeDirectoryDialog
 
         onCurrentPlayFolderChanged: folder => {
+            playContext.playContextAvailable = true;
             root.model.currentPlayFolder = folder;
         }
     }

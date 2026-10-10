@@ -23,6 +23,7 @@ class PlayListModel : public QAbstractListModel {
 
   void pushBack(Common::Mp3Description descr);
   void reset();
+  [[nodiscard]] bool empty() const;
 
   virtual int rowCount(
       const QModelIndex& parent = QModelIndex()) const override;

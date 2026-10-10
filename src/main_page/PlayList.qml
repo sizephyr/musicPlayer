@@ -27,25 +27,27 @@ Item {
             anchors.margins: parent.radius
             clip: true
             spacing: Configuration.scale(6)
+            property var currentTrackUid
 
             model: root.model
+
+            Connections {
+                target: root
+                function onSelected(uid) {
+                    view.currentTrackUid = uid;
+                }
+            }
 
             delegate: PlayListItem {
                 width: view.width
                 height: (view.height - view.anchors.margins * 2) / 7
                 leftPadding: view.anchors.margins
                 text: model.trackArtist + " - " + model.trackTitle
+                selected: model.uid === view.currentTrackUid
 
                 onSelectedChanged: {
                     if (selected)
                         root.selected(model.uid);
-                }
-                Connections {
-                    target: root
-
-                    function onSelected(uid) {
-                        selected = (model.uid === uid);
-                    }
                 }
             }
         }

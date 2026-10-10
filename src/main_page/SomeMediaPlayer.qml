@@ -1,3 +1,5 @@
+pragma Singleton
+
 import QtQuick
 import QtMultimedia
 
@@ -9,7 +11,7 @@ MediaPlayer {
     audioOutput: AudioOutput {
         // TODO: привязать значение из ProgressBar
         // volume: volumeSlider.value
-        volume: 0.5
+        volume: 0.1
     }
 
     onErrorOccurred: (error, errorString) => {

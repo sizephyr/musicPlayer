@@ -22,6 +22,8 @@ void PlayListModel::pushBack(Common::Mp3Description descr) {
 
 void PlayListModel::reset() { _container.clear(); }
 
+bool PlayListModel::empty() const { return _container.empty(); }
+
 int PlayListModel::rowCount(const QModelIndex& parent) const {
   return _container.size();
 }

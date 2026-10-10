@@ -12,17 +12,19 @@ const auto loggingCategory = QLoggingCategory("main_page.model");
 namespace MainPage {
 
 Model::Model(QObject* parent)
-    : QObject{parent}, _playListModel(new PlayListModel(this)) {
-  connect(this, &Model::currentPlayFolderChanged, this,
-          &Model::onCurrentPlayFolderChanged);
-}
+    : QObject{parent}, _playListModel(new PlayListModel(this)) {}
 
 QString Model::currentPlayFolder() const { return _currentPlayFolder; }
 
 void Model::setCurrentPlayFolder(const QString& newCurrentPlayFolder) {
-  if (_currentPlayFolder == newCurrentPlayFolder) return;
+  if (_currentPlayFolder == newCurrentPlayFolder) {
+    return;
+  }
   _currentPlayFolder = newCurrentPlayFolder;
-  emit currentPlayFolderChanged();
+  onCurrentPlayFolderChanged();
+  if (!_playListModel->empty()) {
+    emit currentPlayFolderChanged();
+  }
 }
 
 void Model::onCurrentPlayFolderChanged() {
