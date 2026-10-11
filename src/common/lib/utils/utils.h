@@ -18,6 +18,8 @@ std::expected<QJsonObject, QJsonParseError> parseQJsonObject(
     const QByteArray& rawJSO);
 std::expected<QJsonObject, QString> readJsonFile(
     const std::filesystem::path& filePath);
+std::expected<void, QString> writeJsonToFile(
+    QJsonObject object, const std::filesystem::path& filePath);
 }  // namespace JSON
 
 namespace Image {

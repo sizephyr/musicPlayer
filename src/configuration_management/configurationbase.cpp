@@ -7,6 +7,8 @@
 #include <QStandardPaths>
 #include <chrono>
 
+#include "defaultconfig.h"
+
 namespace {
 const auto loggingCategory = QLoggingCategory("configuration.base");
 
@@ -32,11 +34,18 @@ constinit const auto durationMs = "duration_ms";
 constinit const auto notificationHideAfterMs = "notification_hide_after_ms";
 constinit const auto baseTransferTimeoutMs = "base_transfer_timeout_ms";
 }  // namespace Keys
+
+auto appConfigLocation() {
+  QString configDirStr =
+      QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
+
+  return QDir(configDirStr).filePath(applicationConfigFilename);
+}
 }  // namespace
 
 namespace Configuration {
 
-Base::Base(QObject* parent) : QObject{parent} { load(); }
+Base::Base(QObject* parent) : QObject(parent) { load(); }
 
 void Base::setDisplaySize(int height, int width) {
   _displaySize = QSize(width, height);
@@ -44,15 +53,27 @@ void Base::setDisplaySize(int height, int width) {
 }
 
 void Base::load() {
-  auto configPathExp = getApplicationConfigPath();
+  const auto configPathExp = getApplicationConfigPath();
+
   if (!configPathExp.has_value()) {
-    throw std::runtime_error("Не удалось загрузить конфигурацию приложения: " +
-                             configPathExp.error().toStdString());
+    if (auto configCreatingResult = makeDefaultApplicationConfig();
+        !configCreatingResult) {
+      throw std::runtime_error(
+          "Не удалось загрузить конфигурацию приложения: " +
+          configCreatingResult.error().toStdString());
+    }
   }
 
-  if (auto rawConfigExp = Utils::JSON::readJsonFile(
-          std::filesystem::canonical(configPathExp.value()))) {
+  const auto configPath =
+      configPathExp.has_value()
+          ? configPathExp.value()
+          // если сюда пришли, значит успешно создали конфиг выше
+          : getApplicationConfigPath().value();
+
+  if (auto rawConfigExp =
+          Utils::JSON::readJsonFile(std::filesystem::canonical(configPath))) {
     _rawApplicationConfig = rawConfigExp.value();
+    qDebug() << "::::" << _rawApplicationConfig;
   } else {
     throw std::runtime_error(QString("Невалидная конфигурация приложения: %1")
                                  .arg(rawConfigExp.error())
@@ -61,29 +82,15 @@ void Base::load() {
 }
 
 std::expected<std::filesystem::path, QString> Base::getApplicationConfigPath() {
-#ifdef FORCED_APPLICATION_CONFIG_PATH
-  return std::filesystem::path(FORCED_APPLICATION_CONFIG_PATH);
-#endif
-
-  QString configDirStr =
-      QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-
-  QString configFilePath =
-      QDir(configDirStr).filePath(applicationConfigFilename);
-
-  if (!QFile::exists(configFilePath)) {
+  if (!QFile::exists(appConfigLocation())) {
     return std::unexpected("Файл конфигурации приложения не найден по пути:" +
-                           configFilePath);
+                           appConfigLocation());
   }
 
-  return std::filesystem::path(configFilePath.toStdString());
+  return std::filesystem::path(appConfigLocation().toStdString());
 }
 
 std::expected<std::filesystem::path, QString> Base::getNetworkConfigPath() {
-#ifdef FORCED_NETWORK_CONFIG_PATH
-  return std::filesystem::path(FORCED_NETWORK_CONFIG_PATH);
-#endif
-
   QString configDirStr =
       QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
 
@@ -95,6 +102,21 @@ std::expected<std::filesystem::path, QString> Base::getNetworkConfigPath() {
   }
 
   return std::filesystem::path(configFilePath.toStdString());
+}
+
+std::expected<void, QString> Base::makeDefaultApplicationConfig() {
+  if (auto configObjExp = Utils::JSON::parseQJsonObject(Private::defaultConfig);
+      !configObjExp) {
+    return std::unexpected("Не удалось скомпоновать дефолтный конфиг: " +
+                           configObjExp.error().errorString());
+  } else if (auto writeResult = Utils::JSON::writeJsonToFile(  // NOLINT
+                 configObjExp.value(),
+                 std::filesystem::path(appConfigLocation().toStdString()));
+             !writeResult) {
+    return std::unexpected(writeResult.error());
+  } else {  // NOLINT
+    return {};
+  }
 }
 
 std::optional<QJsonObject> Base::windowObject() const {

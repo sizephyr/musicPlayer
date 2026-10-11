@@ -38,3 +38,9 @@ target_link_libraries(common PRIVATE Qt6::Gui Qt6::Quick configurationplugin
                                      common_lib)
 
 target_include_directories(commonplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(
+  TARGETS commonplugin common_lib common_libplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)

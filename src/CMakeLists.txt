@@ -18,3 +18,9 @@ qt_add_qml_module(
   ../img/base_background.jpg)
 
 target_link_libraries(main PRIVATE themesplugin configurationplugin)
+
+install(
+  TARGETS mainplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)

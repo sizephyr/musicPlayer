@@ -33,3 +33,9 @@ target_link_libraries(
 
 target_include_directories(notify_managerplugin
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(
+  TARGETS notify_managerplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)

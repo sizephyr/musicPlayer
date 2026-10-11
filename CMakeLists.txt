@@ -12,6 +12,7 @@ set(CMAKE_AUTOMOC ON)
 set(QML_IMPORT_PATH
     "${CMAKE_BINARY_DIR}/src/qml"
     CACHE PATH "Path to application qml modules" FORCE)
+
 include(FetchContent)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
@@ -22,16 +23,6 @@ include(cmake/fetch_qcoro.cmake)
 
 qt_standard_project_setup(REQUIRES 6.11)
 
-if(APPLE)
-  message(
-    STATUS
-      "Detected Apple platform. Enabling experimental library features for std::chrono..."
-  )
-
-  add_compile_options(-fexperimental-library)
-else()
-  message(STATUS "Non-Apple platform. Standard compilation flags applied.")
-endif()
 option(SHOW_RESOURCES "Показать ресурсы проекта в лог" OFF)
 
 add_subdirectory(src)
@@ -42,7 +33,7 @@ add_subdirectory(src/page_manager)
 add_subdirectory(src/notify_manager)
 add_subdirectory(src/main_page)
 
-qt_add_executable(musicPlayer src/main.cpp)
+qt_add_executable(musicPlayer MACOSX_BUNDLE src/main.cpp)
 
 if(SHOW_RESOURCES)
   target_compile_definitions(musicPlayer PRIVATE SHOW_RESOURCES)
@@ -52,8 +43,22 @@ target_link_libraries(
   musicPlayer PRIVATE Qt6::Quick mainplugin coreplugin page_managerplugin
                       notify_managerplugin)
 
+set_target_properties(
+  musicPlayer
+  PROPERTIES # MACOSX_BUNDLE_GUI_IDENTIFIER com.example.musicplayer
+             MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
+             MACOSX_BUNDLE_SHORT_VERSION_STRING
+             ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
+             MACOSX_BUNDLE TRUE
+             WIN32_EXECUTABLE TRUE
+             QML_IMPORT_PATH "${CMAKE_BINARY_DIR}/src/qml")
+
 install(
   TARGETS musicPlayer
   BUNDLE DESTINATION .
-  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+if(APPLE)
+  include(cmake/packaging/mac_os_dmg.cmake)
+endif()
+include(CPack)

@@ -6,7 +6,8 @@ if(NOT QCoro6_FOUND)
   FetchContent_Declare(
     QCoro
     GIT_REPOSITORY https://github.com/qcoro/qcoro.git
-    GIT_TAG v0.13.0)
+    GIT_TAG v0.13.0
+    EXCLUDE_FROM_ALL)
 
   block()
   set(QCORO_BUILD_EXAMPLES
@@ -52,4 +53,11 @@ if(NOT QCoro6_FOUND)
       target_compile_options(${_qcoro_target} PRIVATE -Wno-error)
     endif()
   endforeach()
+
+  if(APPLE)
+    install(
+      TARGETS QCoro6Core QCoro6Network
+      ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+      LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)
+  endif()
 endif()

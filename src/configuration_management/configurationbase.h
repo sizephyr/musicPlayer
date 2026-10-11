@@ -37,6 +37,8 @@ class Base : public QObject {
   getApplicationConfigPath();
   [[nodiscard]] static std::expected<std::filesystem::path, QString>
   getNetworkConfigPath();
+  [[nodiscard]] static std::expected<void, QString>
+  makeDefaultApplicationConfig();
 
   [[nodiscard]] std::optional<QJsonObject> windowObject() const;
   [[nodiscard]] std::optional<QJsonObject> animationObject() const;

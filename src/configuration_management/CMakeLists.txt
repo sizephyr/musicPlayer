@@ -21,13 +21,16 @@ qt_add_qml_module(
   Configuration.qml
   SOURCES
   configurationbase.h
-  configurationbase.cpp)
-
-option(MAKE_DEFAULT_CONFIG "Собрать конфигурацию по-умолчанию" OFF)
-
-include(${CMAKE_SOURCE_DIR}/cmake/make_default_application_config.cmake)
+  configurationbase.cpp
+  defaultconfig.h)
 
 target_link_libraries(configuration PRIVATE themesplugin common_lib)
 
 target_include_directories(configurationplugin
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(
+  TARGETS configurationplugin themesplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)

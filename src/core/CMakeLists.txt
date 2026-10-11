@@ -27,3 +27,9 @@ target_link_libraries(
           common_lib
           page_managerplugin
           main_pageplugin)
+
+install(
+  TARGETS coreplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)

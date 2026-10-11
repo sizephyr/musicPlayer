@@ -38,10 +38,14 @@ qt_add_qml_module(
   ../../img/pause_pic.png
   ../../img/previous_track_pic.png
   ../../img/next_track_pic.png
-  QML_FILES BasePlayingActionsButton.qml
-  QML_FILES PlayContextCover.qml
-  QML_FILES PlayProgressBarTimersLine.qml
-  QML_FILES PlayProgressBarTimeline.qml)
+  QML_FILES
+  BasePlayingActionsButton.qml
+  QML_FILES
+  PlayContextCover.qml
+  QML_FILES
+  PlayProgressBarTimersLine.qml
+  QML_FILES
+  PlayProgressBarTimeline.qml)
 
 target_link_libraries(
   main_page
@@ -56,3 +60,9 @@ target_link_libraries(
           page_managerplugin)
 
 target_include_directories(main_pageplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+
+install(
+  TARGETS main_pageplugin
+  BUNDLE DESTINATION .
+  ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+  LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)
