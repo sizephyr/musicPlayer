@@ -93,4 +93,14 @@ void Model::playPrevious(QUuid uid) {
   }
 }
 
+void Model::setPlayer(QMediaPlayer* newPlayer) {
+  _player = newPlayer;
+  connect(_player, &QMediaPlayer::mediaStatusChanged, this,
+          [this](QMediaPlayer::MediaStatus status) {
+            if (status == QMediaPlayer::MediaStatus::EndOfMedia) {
+              playNext(_playListModel->currentTrackUid());
+            }
+          });
+}
+
 }  // namespace MainPage

@@ -4,12 +4,12 @@ import QtQuick
 import QtMultimedia
 
 MediaPlayer {
-    id: mediaPlayer
+    id: root
 
-    property double progressRatio: getProgressRatio(mediaPlayer.position)
+    property double progressRatio: getProgressRatio(position)
 
     audioOutput: AudioOutput {
-        // TODO: привязать значение из ProgressBar
+        // TODO: привязать значение громкости из ProgressBar
         // volume: volumeSlider.value
         volume: 0.1
     }
@@ -19,12 +19,20 @@ MediaPlayer {
     }
 
     function getProgressRatio(position) {
-        if (mediaPlayer.duration <= 0) {
+        if (root.duration <= 0) {
             return 0.000;
         }
-        let ratio = position / mediaPlayer.duration;
+        let ratio = position / root.duration;
 
-        // Ограничиваем значение в пределах от 0 до 1 на случай микросбоев тайминга
         return Math.max(0.000, Math.min(1.000, ratio));
+    }
+    function getPositionFromRatio(ratio) {
+        if (root.duration <= 0) {
+            return 0;
+        }
+
+        let clampedRatio = Math.max(0.0, Math.min(1.0, ratio));
+
+        return Math.round(clampedRatio * root.duration);
     }
 }

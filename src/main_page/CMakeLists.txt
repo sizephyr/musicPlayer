@@ -39,7 +39,9 @@ qt_add_qml_module(
   ../../img/previous_track_pic.png
   ../../img/next_track_pic.png
   QML_FILES BasePlayingActionsButton.qml
-  QML_FILES PlayContextCover.qml)
+  QML_FILES PlayContextCover.qml
+  QML_FILES PlayProgressBarTimersLine.qml
+  QML_FILES PlayProgressBarTimeline.qml)
 
 target_link_libraries(
   main_page

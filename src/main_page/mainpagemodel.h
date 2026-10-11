@@ -6,6 +6,7 @@
 #include <QCoroTask>
 #include <QImage>
 #include <QMediaMetaData>
+#include <QMediaPlayer>
 #include <QObject>
 #include <QQmlEngine>
 
@@ -31,6 +32,9 @@ class Model : public QObject {
   [[nodiscard]] Q_INVOKABLE QString trackPathOf(QUuid);
   Q_INVOKABLE void play(QUuid uid);
 
+  /// \brief для установки юайного синглтона в контекст
+  Q_INVOKABLE void setPlayer(QMediaPlayer* newPlayer);
+
  signals:
   void currentPlayFolderChanged();
   void coverProvided(const QString&);
@@ -46,6 +50,7 @@ class Model : public QObject {
   QString _currentPlayFolder;
   PlayListModel* _playListModel{nullptr};
   PlayContextModel* _playContextModel{nullptr};
+  QMediaPlayer* _player{nullptr};
 };
 
 }  // namespace MainPage

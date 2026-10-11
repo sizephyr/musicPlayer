@@ -11,11 +11,13 @@ Item {
     Item {
         anchors.fill: parent
         anchors.margins: Configuration.scale(100)
+        anchors.topMargin: Configuration.scale(40)
         anchors.rightMargin: 0
 
         ColumnLayout {
             anchors.fill: parent
-            spacing: Configuration.scale(30)
+            anchors.bottomMargin: Configuration.scale(25)
+            spacing: Configuration.scale(0)
 
             Item {
                 Layout.fillWidth: true
@@ -25,6 +27,10 @@ Item {
                     id: cover
                     anchors.fill: parent
                     anchors.margins: Configuration.scale(20)
+                    anchors.bottomMargin: Configuration.scale(0)
+                    // компенсируем ноль снизу для сохранения квадратности
+                    anchors.topMargin: anchors.margins * 2
+
                     border.width: Configuration.scale(6)
                     border.color: Configuration.theme.semiTransparentMutedWhiteColor
                     source: root.model.coverSource
@@ -39,6 +45,10 @@ Item {
                         onPlayPrevious: root.model.playPrevious()
                     }
                 }
+
+                HoverHandler {
+                    id: hoverHandler
+                }
             }
 
             PlayProgressBar {
@@ -46,9 +56,5 @@ Item {
                 Layout.fillWidth: true
             }
         }
-    }
-
-    HoverHandler {
-        id: hoverHandler
     }
 }

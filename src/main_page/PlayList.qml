@@ -33,7 +33,7 @@ Item {
             delegate: PlayListItem {
                 width: view.width
                 height: (view.height - view.anchors.margins * 2) / 7
-                leftPadding: view.anchors.margins
+                horizontalPaddings: view.anchors.margins
                 text: model.trackArtist + " - " + model.trackTitle
                 selected: model.uid === root.model.playListModel.currentTrackUid
 

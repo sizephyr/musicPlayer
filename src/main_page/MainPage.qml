@@ -8,6 +8,10 @@ BaseActionBackgroundRect {
     id: root
     clip: true
 
+    Component.onCompleted: {
+        model.setPlayer(SomeMediaPlayer);
+    }
+
     property MainPageModel model: MainPageModel {}
 
     RowLayout {
