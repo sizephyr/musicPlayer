@@ -7,6 +7,8 @@ Label {
 
     property bool selected: false
 
+    signal select
+
     verticalAlignment: Text.AlignVCenter
     font.pointSize: Configuration.regularTextPointSize
     color: Configuration.theme.darkGrayColor
@@ -25,6 +27,6 @@ Label {
             color: "transparent"
             radius: Configuration.r5Radius
         }
-        onClicked: root.selected = true
+        onClicked: root.select()
     }
 }

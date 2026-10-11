@@ -1,14 +1,18 @@
 #pragma once
 
-#include <QtQml/qqmlregistration.h>
 #include <mp3description.h>
 
 #include <QAbstractListModel>
+#include <QQmlEngine>
 
+/// \note вообще, у QMediaPlayer есть свои опции плейлиста и хорошо бы
+/// использовать его, но мне пока что в лом разбираться, сделаю, как знаю
 class PlayListModel : public QAbstractListModel {
   Q_OBJECT
-
   QML_ELEMENT
+
+  Q_PROPERTY(QUuid currentTrackUid READ currentTrackUid NOTIFY
+                 currentTrackChanged FINAL)
 
  public:
   enum ItemContentRole {
@@ -21,7 +25,7 @@ class PlayListModel : public QAbstractListModel {
 
   explicit PlayListModel(QObject* parent = nullptr);
 
-  void pushBack(Common::Mp3Description descr);
+  void pushBack(std::shared_ptr<Common::Mp3Description> descr);
   void reset();
   [[nodiscard]] bool empty() const;
 
@@ -30,13 +34,24 @@ class PlayListModel : public QAbstractListModel {
   virtual QVariant data(const QModelIndex& index, int role) const override;
   virtual QHash<int, QByteArray> roleNames() const override;
 
-  [[nodiscard]] std::optional<Common::Mp3Description> mp3DescriptionByTrackUid(
-      QUuid) const;
-  /// \attention \todo функция не регистрирует изменения в модели!
-  void modifyDescr(QUuid, std::function<void(Common::Mp3Description&)>);
+  [[nodiscard]] std::shared_ptr<Common::Mp3Description>
+      mp3DescriptionByTrackUid(QUuid) const;
+  /// \brief возвращает описание следующего трека, расположенного в списке после
+  /// того, чей UID передан в качестве аргумента
+  [[nodiscard]] std::shared_ptr<Common::Mp3Description> next(QUuid);
+  /// \brief возвращает описание следующего трека, расположенного в списке перед
+  /// того, чей UID передан в качестве аргумента
+  [[nodiscard]] std::shared_ptr<Common::Mp3Description> previous(QUuid);
+
+  std::shared_ptr<Common::Mp3Description> currentTrack() const;
+  void setCurrentTrack(std::shared_ptr<Common::Mp3Description> newCurrentTrack);
+  void resetCurrentTrack();
+  QUuid currentTrackUid() const;
 
  signals:
+  void currentTrackChanged();
 
  private:
-  QList<Common::Mp3Description> _container;
+  QList<std::shared_ptr<Common::Mp3Description>> _container;
+  std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
 };

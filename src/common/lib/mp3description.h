@@ -29,6 +29,8 @@ class Mp3Description {
   void setCoverImagePath(
       std::optional<std::filesystem::path> newCoverImagePath);
 
+  [[nodiscard]] auto operator<=>(const Mp3Description&) const = default;
+
  private:
   QUuid _uid;
   std::filesystem::path _path;

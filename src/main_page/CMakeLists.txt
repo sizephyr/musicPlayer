@@ -38,7 +38,8 @@ qt_add_qml_module(
   ../../img/pause_pic.png
   ../../img/previous_track_pic.png
   ../../img/next_track_pic.png
-  QML_FILES BasePlayingActionsButton.qml)
+  QML_FILES BasePlayingActionsButton.qml
+  QML_FILES PlayContextCover.qml)
 
 target_link_libraries(
   main_page

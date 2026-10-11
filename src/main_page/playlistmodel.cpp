@@ -1,7 +1,5 @@
 #include "playlistmodel.h"
 
-#include <ranges>
-
 namespace {
 namespace RoleNames {
 const auto uid = "uid";
@@ -14,7 +12,7 @@ const auto coverImagePath = "coverImagePath";
 
 PlayListModel::PlayListModel(QObject* parent) : QAbstractListModel{parent} {}
 
-void PlayListModel::pushBack(Common::Mp3Description descr) {
+void PlayListModel::pushBack(std::shared_ptr<Common::Mp3Description> descr) {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _container.push_back(std::move(descr));
   endInsertRows();
@@ -31,16 +29,16 @@ int PlayListModel::rowCount(const QModelIndex& parent) const {
 QVariant PlayListModel::data(const QModelIndex& index, int role) const {
   switch (role) {
     case Uid:
-      return QVariant::fromValue(_container[index.row()].uid());
+      return QVariant::fromValue(_container[index.row()]->uid());
     case Path:
-      return QVariant::fromValue(_container[index.row()].path().c_str());
+      return QVariant::fromValue(_container[index.row()]->path().c_str());
     case TrackTitle:
-      return QVariant::fromValue(_container[index.row()].title().value);
+      return QVariant::fromValue(_container[index.row()]->title().value);
     case TrackArtist:
-      return QVariant::fromValue(_container[index.row()].artist().value);
+      return QVariant::fromValue(_container[index.row()]->artist().value);
     case CoverImagePath:
       return QVariant::fromValue(
-          _container[index.row()].coverImagePath().value_or("").c_str());
+          _container[index.row()]->coverImagePath().value_or("").c_str());
     default:
       return QVariant();
   }
@@ -56,25 +54,62 @@ QHash<int, QByteArray> PlayListModel::roleNames() const {
   };
 }
 
-std::optional<Common::Mp3Description> PlayListModel::mp3DescriptionByTrackUid(
+std::shared_ptr<Common::Mp3Description> PlayListModel::mp3DescriptionByTrackUid(
     QUuid uid) const {
   auto findResult = std::ranges::find_if(
       _container,
-      [uid](const auto& description) { return description.uid() == uid; });
+      [uid](const auto& description) { return description->uid() == uid; });
 
   if (findResult == _container.end()) {
-    return std::nullopt;
+    return nullptr;
   }
+
   return *findResult;
 }
 
-void PlayListModel::modifyDescr(
-    QUuid trackUid, std::function<void(Common::Mp3Description&)> updater) {
-  // будет найдено единственное описание
-  auto targetTracks =
-      _container | std::views::filter([trackUid](const auto& descr) {
-        return descr.uid() == trackUid;
+std::shared_ptr<Common::Mp3Description> PlayListModel::next(
+    QUuid currentDescrUid) {
+  auto it =
+      std::ranges::find_if(_container, [currentDescrUid](const auto& item) {
+        return item->uid() == currentDescrUid;
       });
-  // но применим так, будто их много, просто потому что так кода меньше)
-  std::ranges::for_each(targetTracks, updater);
+
+  if (it == _container.end() || std::next(it) == _container.end()) {
+    return nullptr;
+  }
+
+  return *std::next(it);
+}
+
+std::shared_ptr<Common::Mp3Description> PlayListModel::previous(
+    QUuid currentDescrUid) {
+  auto it =
+      std::ranges::find_if(_container, [currentDescrUid](const auto& item) {
+        return item->uid() == currentDescrUid;
+      });
+
+  if (it == _container.end() || it == _container.begin()) {
+    return nullptr;
+  }
+
+  return *std::prev(it);
+}
+
+std::shared_ptr<Common::Mp3Description> PlayListModel::currentTrack() const {
+  return _currentTrack;
+}
+
+void PlayListModel::setCurrentTrack(
+    std::shared_ptr<Common::Mp3Description> newCurrentTrack) {
+  _currentTrack = newCurrentTrack;
+  emit currentTrackChanged();
+}
+
+void PlayListModel::resetCurrentTrack() {
+  _currentTrack.reset();
+  emit currentTrackChanged();
+}
+
+QUuid PlayListModel::currentTrackUid() const {
+  return _currentTrack ? _currentTrack->uid() : QUuid();
 }

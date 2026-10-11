@@ -31,6 +31,7 @@ Item {
                     width: playPauseButton.width * 0.7
                     height: width
                     icon.source: "img/previous_track_pic.png"
+                    onClicked: root.playPrevious()
                 }
             }
             Item {
@@ -43,6 +44,8 @@ Item {
                     width: Configuration.scale(110)
                     height: width
                     icon.source: SomeMediaPlayer.playing ? "img/pause_pic.png" : "img/play_pic.png"
+
+                    onClicked: SomeMediaPlayer.playing ? SomeMediaPlayer.pause() : SomeMediaPlayer.play()
                 }
             }
             Item {
@@ -54,6 +57,7 @@ Item {
                     width: playPauseButton.width * 0.7
                     height: width
                     icon.source: "img/next_track_pic.png"
+                    onClicked: root.playNext()
                 }
             }
         }

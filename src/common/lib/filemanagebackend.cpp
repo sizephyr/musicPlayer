@@ -35,8 +35,8 @@ FileManageBackend::filesSearch(const QString& path) {
   const std::filesystem::path directoryPath =
       QUrl(path).toLocalFile().toStdString();
 
-  qCDebug(loggingCategory) << "Original path:" << path;
-  qCDebug(loggingCategory) << "Converted directory path:" << directoryPath;
+  // qCDebug(loggingCategory) << "Original path:" << path;
+  qCInfo(loggingCategory) << "Directory path:" << directoryPath;
 
   const QDir directory(directoryPath);
   if (!directory.exists()) {
@@ -47,7 +47,7 @@ FileManageBackend::filesSearch(const QString& path) {
   const QStringList entries =
       directory.entryList({QStringLiteral("*.mp3")}, QDir::Files);
 
-  qCDebug(loggingCategory) << "Files found:" << entries;
+  // qCDebug(loggingCategory) << "Files found:" << entries;
 
   if (entries.isEmpty()) {
     return std::unexpected(QStringLiteral("No MP3 files found in directory."));
@@ -63,7 +63,7 @@ FileManageBackend::filesSearch(const QString& path) {
   return result;
 }
 
-std::optional<Common::Mp3Description> FileManageBackend::parseMp3(
+std::shared_ptr<Common::Mp3Description> FileManageBackend::parseMp3(
     const std::filesystem::path& filePath) {
   return parseID3(filePath);
 }
@@ -100,18 +100,18 @@ QString decodeText(const QByteArray& data) {
   return result.trimmed();
 }
 
-std::optional<Common::Mp3Description> FileManageBackend::parseID3(
+std::shared_ptr<Common::Mp3Description> FileManageBackend::parseID3(
     const std::filesystem::path& filePath) {
   QFile file(filePath);
   if (!file.open(QIODevice::ReadOnly)) {
     qCWarning(loggingCategory) << "Cannot open file for reading:" << filePath;
-    return std::nullopt;
+    return nullptr;
   }
 
   QByteArray header = file.read(10);
   if (header.size() < 10 || !header.startsWith("ID3")) {
     qCWarning(loggingCategory) << "No ID3 tag found in file:" << filePath;
-    return std::nullopt;
+    return nullptr;
   }
 
   const int tagSize = parseSynchsafeInt(header.constData() + 6);
@@ -123,8 +123,8 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
   std::optional<Common::Mp3DescriptionTypes::TrackArtist> TrackArtist;
   while (pos < tagSize) {
     if (pos + 10 > tagData.size()) {
-      qCWarning(loggingCategory)
-          << "Incomplete frame header at position:" << pos;
+      // qCWarning(loggingCategory)
+      //     << "Incomplete frame header at position:" << pos;
       break;
     }
 
@@ -155,10 +155,10 @@ std::optional<Common::Mp3Description> FileManageBackend::parseID3(
   }
 
   if (trackTitle.has_value() && TrackArtist.has_value()) {
-    return Common::Mp3Description(filePath, trackTitle.value(),
-                                  TrackArtist.value(), coverImagePath);
+    return std::make_shared<Common::Mp3Description>(
+        filePath, trackTitle.value(), TrackArtist.value(), coverImagePath);
   }
-  return std::nullopt;
+  return nullptr;
 }
 
 std::optional<std::filesystem::path> FileManageBackend::getCoverImagePath(
@@ -209,7 +209,7 @@ std::optional<std::filesystem::path> FileManageBackend::getCoverImagePath(
 }
 
 QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
-    Common::Mp3Description& descr) {
+    std::shared_ptr<Common::Mp3Description> descr) {
   QProcess process;
 
   // Исправлено формирование пути: расширение .png добавлено в саму строку
@@ -217,14 +217,14 @@ QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
   const auto targetImagePath =
       QStringLiteral("%1/%2.png")
           .arg(QStandardPaths::writableLocation(QStandardPaths::TempLocation),
-               descr.uid().toString(QUuid::WithoutBraces));
+               descr->uid().toString(QUuid::WithoutBraces));
 
   // Настраиваем исполняемый файл и аргументы команды
   process.setProgram(QStringLiteral("ffmpeg"));
   process.setArguments({
       QStringLiteral("-y"),  // Принудительная перезапись без вопросов!
       QStringLiteral("-i"),
-      descr.path().c_str(),
+      descr->path().c_str(),
       QStringLiteral("-map"),
       QStringLiteral("0:v:0"),
       QStringLiteral("-c:v"),
@@ -245,7 +245,7 @@ QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
 
   // Проверяем результаты выполнения
   if (process.exitStatus() == QProcess::NormalExit && process.exitCode() == 0) {
-    descr.setCoverImagePath(targetImagePath.toStdString());
+    descr->setCoverImagePath(targetImagePath.toStdString());
   } else {
     qWarning() << "Ошибка выполнения ffmpeg:" << process.readAllStandardError();
   }

@@ -1,16 +1,39 @@
 #pragma once
 
+#include <mp3description.h>
+
+#include <QCoroTask>
 #include <QObject>
 #include <QQmlEngine>
 
 class PlayContextModel : public QObject {
   Q_OBJECT
   QML_ELEMENT
+
+  Q_PROPERTY(QString coverSource READ coverSource NOTIFY coverSourceChanged)
+  Q_PROPERTY(bool contextCompletted READ contextCompletted NOTIFY
+                 contextComplettedChanged)
  public:
   explicit PlayContextModel(QObject* parent = nullptr);
 
- signals:
+  QString coverSource() const;
+  void setCurrentTrack(std::shared_ptr<Common::Mp3Description> newCurrentTrack);
+  void resetCurrentTrack();
 
- private:
-  // double progress
+  bool contextCompletted() const;
+  void setContextCompletted(bool newContextCompletted);
+
+ signals:
+  void callCoverSurceProviding();
+  void coverSourceChanged();
+  void contextComplettedChanged();
+  void playNext();
+  void playPrevious();
+
+ private slots:
+  [[nodiscard]] QCoro::Task<> provideCover();
+
+ private:  // NOLINT
+  bool _contextCompletted;
+  std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
 };

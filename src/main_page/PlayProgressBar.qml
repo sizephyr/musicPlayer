@@ -16,7 +16,7 @@ Rectangle {
     radius: Configuration.r3Radius
 
     readonly property double progressBegin: 0.0
-    property double progress: 0.0 // 0.0-1.0
+    property double progress: SomeMediaPlayer.progressRatio
 
     function calculateBoundWidth() {
         const p = Math.max(0.0, Math.min(1.0, progress));
