@@ -53,32 +53,46 @@ void Base::setDisplaySize(int height, int width) {
 }
 
 void Base::load() {
-  const auto configPathExp = getApplicationConfigPath();
+  auto configPathExp = getApplicationConfigPath();
 
+  // Если пути нет, создаем конфигурацию по умолчанию
   if (!configPathExp.has_value()) {
     if (auto configCreatingResult = makeDefaultApplicationConfig();
         !configCreatingResult) {
       throw std::runtime_error(
-          "Не удалось загрузить конфигурацию приложения: " +
+          "Не удалось создать конфигурацию приложения по умолчанию: " +
           configCreatingResult.error().toStdString());
+    }
+
+    // Пытаемся получить путь повторно после успешного создания файла
+    configPathExp = getApplicationConfigPath();
+    if (!configPathExp.has_value()) {
+      throw std::runtime_error(
+          "Критическая ошибка: Путь к конфигурации недоступен после попытки её "
+          "создания.");
     }
   }
 
-  const auto configPath =
-      configPathExp.has_value()
-          ? configPathExp.value()
-          // если сюда пришли, значит успешно создали конфиг выше
-          : getApplicationConfigPath().value();
+  const auto configPath = configPathExp.value();
 
-  if (auto rawConfigExp =
-          Utils::JSON::readJsonFile(std::filesystem::canonical(configPath))) {
-    _rawApplicationConfig = rawConfigExp.value();
-    qDebug() << "::::" << _rawApplicationConfig;
-  } else {
+  std::error_code ec;
+  const auto canonicalPath = std::filesystem::canonical(configPath, ec);
+
+  if (ec) {
+    throw std::runtime_error(
+        "Файл конфигурации не найден или недоступен по пути '" +
+        configPath.string() + "'. Системная ошибка: " + ec.message());
+  }
+
+  auto rawConfigExp = Utils::JSON::readJsonFile(canonicalPath);
+  if (!rawConfigExp) {
     throw std::runtime_error(QString("Невалидная конфигурация приложения: %1")
                                  .arg(rawConfigExp.error())
                                  .toStdString());
   }
+
+  _rawApplicationConfig = rawConfigExp.value();
+  qDebug() << "Конфигурация успешно загружена:" << _rawApplicationConfig;
 }
 
 std::expected<std::filesystem::path, QString> Base::getApplicationConfigPath() {
