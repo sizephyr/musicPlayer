@@ -9,6 +9,8 @@ Rectangle {
 
     color: Configuration.theme.semiTransparentLightGrayColor
     radius: Configuration.r3Radius
+    border.width: Configuration.scale(6)
+    border.color: Configuration.theme.semiTransparentMutedWhiteColor
 
     Image {
         id: coverMock // заглушка с вопросительным знаком, если нет обложки

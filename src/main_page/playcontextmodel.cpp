@@ -2,23 +2,18 @@
 
 #include <filemanagebackend.h>
 
-PlayContextModel::PlayContextModel(QObject* parent) : QObject{parent} {
-  connect(this, &PlayContextModel::callCoverSurceProviding, this,
+#include <QDir>
+
+PlayContextModel::PlayContextModel(QObject* parent)
+    : QObject{parent},
+      _currentTrackCover(new QTemporaryFile(
+          QDir::tempPath() + "/current_cover_XXXXXX.png", this)) {
+  connect(this, &PlayContextModel::callCoverSourceProviding, this,
           &PlayContextModel::provideCover);
 }
 
 QString PlayContextModel::coverSource() const {
-  if (_currentTrack == nullptr) {
-    return "";
-  }
-
-  auto pathString =
-      QString(_currentTrack->coverImagePath().value_or({}).c_str());
-  if (pathString.isEmpty()) {
-    return "";
-  }
-
-  return QStringLiteral("file://") + pathString;
+  return QStringLiteral("file://") + _currentTrackCover->fileName();
 }
 
 void PlayContextModel::setCurrentTrack(
@@ -27,7 +22,7 @@ void PlayContextModel::setCurrentTrack(
     return;
   }
   _currentTrack = newCurrentTrack;
-  emit callCoverSurceProviding();
+  emit callCoverSourceProviding();
 }
 
 void PlayContextModel::resetCurrentTrack() {
@@ -44,13 +39,14 @@ void PlayContextModel::setContextCompletted(bool newContextCompletted) {
 }
 
 QCoro::Task<> PlayContextModel::provideCover() {
-  qDebug() << "::::" << __FUNCTION__;
-  if (_currentTrack != nullptr) {
-    if (!_currentTrack->coverImagePath().has_value()) {
-      // попытка изъять обложку с помощью ffmpeg, потому что она прячется
-      //  как долбанный видеопоток!
-      co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(_currentTrack);
-    }
+  if (_currentTrack != nullptr && _currentTrackCover->open()) {
+    qDebug() << "::::" << _currentTrackCover->fileName()
+             << _currentTrackCover->filesystemFileName().c_str();
+    auto cleanup = qScopeGuard([this] { _currentTrackCover->close(); });
+    // попытка изъять обложку с помощью ffmpeg, потому что она прячется
+    //  как долбанный видеопоток!
+    co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
+        _currentTrack, _currentTrackCover->filesystemFileName());
   }
 
   emit coverSourceChanged();

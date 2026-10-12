@@ -20,7 +20,7 @@ class PlayListModel : public QAbstractListModel {
     Path,
     TrackTitle,
     TrackArtist,
-    CoverImagePath,
+    // CoverImagePath,
   };
 
   explicit PlayListModel(QObject* parent = nullptr);

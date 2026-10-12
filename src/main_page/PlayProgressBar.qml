@@ -12,7 +12,7 @@ Item {
 
         PlayProgressBarTimersLine {
             Layout.fillWidth: true
-            Layout.preferredHeight: 10
+            Layout.preferredHeight: Configuration.scale(15)
             hovered: playProgressBar.hovered
         }
 
@@ -20,7 +20,7 @@ Item {
             id: playProgressBar
 
             Layout.fillWidth: true
-            Layout.preferredHeight: 10
+            Layout.preferredHeight: Configuration.scale(15)
         }
     }
 }

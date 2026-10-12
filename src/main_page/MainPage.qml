@@ -32,7 +32,7 @@ BaseActionBackgroundRect {
 
             OpenCurrentFolderBtn {
                 id: openCurrentFolderBtn
-                anchors.centerIn: parent
+                anchors.fill: parent
                 onClicked: activeDirectoryDialog.show()
             }
         }

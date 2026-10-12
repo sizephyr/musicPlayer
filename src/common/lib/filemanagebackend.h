@@ -16,7 +16,7 @@ class FileManageBackend {
   /// \brief попытка изъять обложку с помощью ffmpeg, потому что она прячется
   /// как долбанный видеопоток!
   [[nodiscard]] static QCoro::Task<> fillCoverImagePathByFfmpegCLI(
-      std::shared_ptr<Common::Mp3Description>);
+      std::shared_ptr<const Common::Mp3Description>, std::filesystem::path);
 
  private:
   [[nodiscard]] static std::shared_ptr<Common::Mp3Description> parseID3(

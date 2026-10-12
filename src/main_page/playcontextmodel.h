@@ -5,6 +5,7 @@
 #include <QCoroTask>
 #include <QObject>
 #include <QQmlEngine>
+#include <QTemporaryFile>
 
 class PlayContextModel : public QObject {
   Q_OBJECT
@@ -24,7 +25,7 @@ class PlayContextModel : public QObject {
   void setContextCompletted(bool newContextCompletted);
 
  signals:
-  void callCoverSurceProviding();
+  void callCoverSourceProviding();
   void coverSourceChanged();
   void contextComplettedChanged();
   void playNext();
@@ -36,4 +37,5 @@ class PlayContextModel : public QObject {
  private:  // NOLINT
   bool _contextCompletted;
   std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
+  QTemporaryFile* _currentTrackCover{nullptr};
 };

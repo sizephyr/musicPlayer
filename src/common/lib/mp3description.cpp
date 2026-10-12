@@ -2,15 +2,13 @@
 
 namespace Common {
 
-Mp3Description::Mp3Description(
-    std::filesystem::path path, Mp3DescriptionTypes::TrackTitle title,
-    Mp3DescriptionTypes::TrackArtist artist,
-    std::optional<std::filesystem::path> coverImagePath)
+Mp3Description::Mp3Description(std::filesystem::path path,
+                               Mp3DescriptionTypes::TrackTitle title,
+                               Mp3DescriptionTypes::TrackArtist artist)
     : _uid(QUuid::createUuid()),
       _path(std::move(path)),
       _title(std::move(title)),
-      _artist(std::move(artist)),
-      _coverImagePath(std::move(coverImagePath)) {}
+      _artist(std::move(artist)) {}
 
 QUuid Mp3Description::uid() const { return _uid; }
 
@@ -20,15 +18,6 @@ Mp3DescriptionTypes::TrackTitle Mp3Description::title() const { return _title; }
 
 Mp3DescriptionTypes::TrackArtist Mp3Description::artist() const {
   return _artist;
-}
-
-std::optional<std::filesystem::path> Mp3Description::coverImagePath() const {
-  return _coverImagePath;
-}
-
-void Mp3Description::setCoverImagePath(
-    std::optional<std::filesystem::path> newCoverImagePath) {
-  _coverImagePath = newCoverImagePath;
 }
 
 }  // namespace Common

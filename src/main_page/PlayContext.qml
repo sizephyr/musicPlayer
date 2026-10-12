@@ -30,19 +30,16 @@ Item {
                     anchors.bottomMargin: Configuration.scale(0)
                     // компенсируем ноль снизу для сохранения квадратности
                     anchors.topMargin: anchors.margins * 2
-
-                    border.width: Configuration.scale(6)
-                    border.color: Configuration.theme.semiTransparentMutedWhiteColor
                     source: root.model.coverSource
-                    onSourceChanged: console.debug(source)
 
                     PlayContextBasePlayingActions {
                         anchors.fill: parent
                         anchors.margins: parent.border.width
                         visible: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
                         radiusCorrecting: parent.border.width
-                        onPlayNext: root.model.playNext()
-                        onPlayPrevious: root.model.playPrevious()
+                        onPlayNextClicked: root.model.playNext()
+                        onPlayPreviousClicked: root.model.playPrevious()
+                        onPlayPauseClicked: SomeMediaPlayer.playing ? SomeMediaPlayer.pause() : SomeMediaPlayer.play()
                     }
                 }
 
