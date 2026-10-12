@@ -18,17 +18,17 @@ class Base : public QObject {
  public:
   explicit Base(QObject* parent = nullptr);
 
-  void setDisplaySize(QSize);
-  [[nodiscard]] Q_INVOKABLE int windowWidth() const;
-  [[nodiscard]] Q_INVOKABLE int windowHeight() const;
+  [[nodiscard]] Q_INVOKABLE int referenceWindowWidth() const;
+  [[nodiscard]] Q_INVOKABLE int referenceWindowHeight() const;
   [[nodiscard]] Q_INVOKABLE QString windowTitle() const;
   [[nodiscard]] Q_INVOKABLE int animationDurationMs() const;
   [[nodiscard]] Q_INVOKABLE int baseTransferTimeoutMs() const;
   [[nodiscard]] Q_INVOKABLE int notificationHideAfterMs() const;
   [[nodiscard]] Q_INVOKABLE QString windowBackground() const;
 
-  [[nodiscard]] double scaleFactor() const;
+  void setDisplaySize(QSize);
   [[nodiscard]] QSize displaySize() const;
+  [[nodiscard]] double scaleFactor() const;
 
  signals:
   void connectionConfiguredChanged();

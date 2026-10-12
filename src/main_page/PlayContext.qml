@@ -10,9 +10,10 @@ Item {
 
     Item {
         anchors.fill: parent
-        anchors.margins: Configuration.scale(100)
+        anchors.bottomMargin: Configuration.scale(100)
         anchors.topMargin: Configuration.scale(40)
         anchors.rightMargin: 0
+        anchors.leftMargin: Configuration.scale(50)
 
         ColumnLayout {
             anchors.fill: parent
@@ -25,13 +26,16 @@ Item {
 
                 PlayContextCover {
                     id: cover
-                    anchors.fill: parent
-                    anchors.margins: Configuration.scale(20)
-                    anchors.bottomMargin: Configuration.scale(0)
-                    // компенсируем ноль снизу для сохранения квадратности
-                    anchors.topMargin: anchors.margins * 2
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    anchors.rightMargin: Configuration.scale(15)
+                    anchors.bottomMargin: Configuration.scale(5)
+                    width: parent.width * 0.8
+                    height: width
+
                     source: root.model.coverSource
 
+                    // след/пред трек, плей/пауза
                     PlayContextBasePlayingActions {
                         anchors.fill: parent
                         anchors.margins: parent.border.width
@@ -51,6 +55,7 @@ Item {
             PlayProgressBar {
                 id: playProgressBar
                 Layout.fillWidth: true
+                Layout.leftMargin: Configuration.scale(50)
             }
         }
     }

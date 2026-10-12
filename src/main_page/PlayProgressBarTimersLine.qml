@@ -33,6 +33,7 @@ Item {
             text: root.formatTime(SomeMediaPlayer.position)
             color: Configuration.theme.lightGrayColor
             visible: root.hovered
+            font.bold: true
         }
         Item {
             Layout.fillWidth: true
@@ -43,6 +44,7 @@ Item {
             text: root.formatTime(SomeMediaPlayer.duration)
             color: Configuration.theme.lightGrayColor
             visible: root.hovered
+            font.bold: true
         }
     }
 }

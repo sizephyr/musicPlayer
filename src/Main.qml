@@ -8,10 +8,10 @@ import modules.core
 Window {
     id: root
     objectName: "mainWindow"
-    width: Configuration.windowWidth()
-    height: Configuration.windowHeight()
-    minimumWidth: Configuration.windowWidth()
-    minimumHeight: Configuration.windowHeight()
+    width: Configuration.displaySize.width
+    height: Configuration.displaySize.height
+    minimumWidth: Configuration.referenceWindowWidth()
+    minimumHeight: Configuration.referenceWindowHeight()
 
     visible: true
 

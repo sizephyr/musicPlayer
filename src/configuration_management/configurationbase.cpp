@@ -161,7 +161,7 @@ std::optional<QJsonObject> Base::networkObject() const {
   return std::nullopt;
 }
 
-int Base::windowWidth() const {
+int Base::referenceWindowWidth() const {
   if (auto windowObjectOpt = windowObject();
       windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::width) &&
       windowObjectOpt->value(Keys::width).isDouble()) {
@@ -171,7 +171,7 @@ int Base::windowWidth() const {
   return {};  // этот метод вызывается в QML, поэтому не std::optional
 }
 
-int Base::windowHeight() const {
+int Base::referenceWindowHeight() const {
   if (auto windowObjectOpt = windowObject();
       windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::height) &&
       windowObjectOpt->value(Keys::height).isDouble()) {
@@ -247,10 +247,7 @@ double Base::scaleFactor() const {
     return 1.0;
   }
 
-  static const auto factor =
-      average(_displaySize.value()) / average(referenceDisplaySize);
-
-  return factor;
+  return average(displaySize()) / average(referenceDisplaySize);
 }
 
 QSize Base::displaySize() const { return _displaySize.value_or({}); }
