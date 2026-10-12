@@ -9,6 +9,7 @@ class MainMenuItemsModel;
 
 class Core : public QQuickItem {
   Q_OBJECT
+  Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
   Q_PROPERTY(bool connectionConfigured READ connectionConfigured WRITE
                  setConfiguredState NOTIFY connectionConfiguredChanged)
   QML_ELEMENT
@@ -16,6 +17,7 @@ class Core : public QQuickItem {
   explicit Core(QQuickItem *parent = nullptr);
 
   [[nodiscard]] bool connectionConfigured() const;
+  [[nodiscard]] static Qt::WindowFlags windowFlags();
 
  signals:
   void connectionConfiguredChanged();

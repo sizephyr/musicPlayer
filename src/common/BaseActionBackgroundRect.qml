@@ -3,14 +3,16 @@ import modules.configuration
 
 Rectangle {
     id: root
+
     color: Configuration.theme.semiTransparentGrayColor
+    radius: Configuration.r5Radius
 
     // на момент Component.onCompleted размеры ещё просто не успели примениться
-    onHeightChanged: {
-        if (height > 0 && !appearanceAnimation.running && translateTransform.y === 0) {
-            show();
-        }
-    }
+    // onHeightChanged: {
+    //     if (height > 0 && !appearanceAnimation.running && translateTransform.y === 0) {
+    //         show();
+    //     }
+    // }
 
     readonly property int baseRadius: Configuration.r1Radius
 

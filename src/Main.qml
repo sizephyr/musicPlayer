@@ -1,24 +1,34 @@
 import QtQuick
+import QtQuick.Effects
 import modules.configuration
 import modules.notify_manager
 import modules.page_manager
 import modules.core
 
 Window {
+    id: root
+    objectName: "mainWindow"
     width: Configuration.windowWidth()
     height: Configuration.windowHeight()
     minimumWidth: Configuration.windowWidth()
     minimumHeight: Configuration.windowHeight()
-    maximumWidth: Configuration.windowWidth()
-    maximumHeight: Configuration.windowHeight()
 
     visible: true
-    flags: Qt.Window
 
     property bool closeWindow: false
 
+    readonly property double aspectRatio: 16.0 / 9.0
+
+    // Флаг для предотвращения бесконечной рекурсии сигналов
+    property bool isAdjusting: false
+
     Component.onCompleted: {
-        Configuration.setDisplaySize(height, width);
+        root.flags = core.windowFlags;
+    }
+    Binding {
+        target: Configuration
+        property: "displaySize"
+        value: Qt.size(width, height)
     }
 
     Core {
@@ -30,18 +40,37 @@ Window {
         }
 
         Image {
+            id: backgroundImage
             anchors.fill: parent
             source: "file:" + Configuration.windowBackground()
 
-            Item {
-                id: contentItem
-                anchors.fill: parent
+            visible: false
+        }
 
-                Loader {
-                    id: contentLoader
-                    anchors.fill: parent
-                    source: PageManager.currentPageContextModel ? PageManager.currentPageContextModel.pageSource : ""
-                }
+        Rectangle {
+            id: backgroundImageMaskRectangle
+            anchors.fill: backgroundImage
+            radius: Configuration.r5Radius
+            color: "black"
+            visible: false
+            layer.enabled: true
+        }
+
+        MultiEffect {
+            anchors.fill: backgroundImage
+            source: backgroundImage
+            maskEnabled: true
+            maskSource: backgroundImageMaskRectangle
+        }
+
+        Item {
+            id: contentItem
+            anchors.fill: parent
+
+            Loader {
+                id: contentLoader
+                anchors.fill: parent
+                source: PageManager.currentPageContextModel ? PageManager.currentPageContextModel.pageSource : ""
             }
         }
     }
@@ -57,6 +86,24 @@ Window {
 
         function onLastPageClosed() {
             root.close();
+        }
+    }
+
+    onWidthChanged: {
+        if (!isAdjusting) {
+            isAdjusting = true;
+            // Корректируем высоту под ширину
+            root.height = Math.round(root.width / aspectRatio);
+            isAdjusting = false;
+        }
+    }
+
+    onHeightChanged: {
+        if (!isAdjusting) {
+            isAdjusting = true;
+            // Корректируем ширину под высоту
+            root.width = Math.round(root.height * aspectRatio);
+            isAdjusting = false;
         }
     }
 }

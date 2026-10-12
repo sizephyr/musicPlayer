@@ -47,9 +47,10 @@ namespace Configuration {
 
 Base::Base(QObject* parent) : QObject(parent) { load(); }
 
-void Base::setDisplaySize(int height, int width) {
-  _displaySize = QSize(width, height);
+void Base::setDisplaySize(QSize size) {
+  _displaySize = size;
   emit scaleFactorChanged();
+  emit displaySizeChanged();
 }
 
 void Base::load() {
@@ -251,5 +252,7 @@ double Base::scaleFactor() const {
 
   return factor;
 }
+
+QSize Base::displaySize() const { return _displaySize.value_or({}); }
 
 }  // namespace Configuration

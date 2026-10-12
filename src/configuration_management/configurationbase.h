@@ -11,12 +11,14 @@ namespace Configuration {
 
 class Base : public QObject {
   Q_OBJECT
+  Q_PROPERTY(QSize displaySize READ displaySize WRITE setDisplaySize NOTIFY
+                 displaySizeChanged)
   Q_PROPERTY(double scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
   QML_NAMED_ELEMENT(ConfigurationBase)
  public:
   explicit Base(QObject* parent = nullptr);
 
-  Q_INVOKABLE void setDisplaySize(int height, int width);
+  void setDisplaySize(QSize);
   [[nodiscard]] Q_INVOKABLE int windowWidth() const;
   [[nodiscard]] Q_INVOKABLE int windowHeight() const;
   [[nodiscard]] Q_INVOKABLE QString windowTitle() const;
@@ -26,10 +28,12 @@ class Base : public QObject {
   [[nodiscard]] Q_INVOKABLE QString windowBackground() const;
 
   [[nodiscard]] double scaleFactor() const;
+  [[nodiscard]] QSize displaySize() const;
 
  signals:
   void connectionConfiguredChanged();
   void scaleFactorChanged();
+  void displaySizeChanged();
 
  private:
   void load();

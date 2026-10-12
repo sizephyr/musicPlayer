@@ -13,7 +13,7 @@ Button {
     icon.color: Configuration.theme.darkGrayColor
 
     background: Rectangle {
-        color: Configuration.theme.semiTransparentGrayColor
+        color: "transparent"
         radius: root.height / 2
     }
 }
