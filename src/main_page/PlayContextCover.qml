@@ -8,14 +8,14 @@ Rectangle {
     property alias source: cover.source
 
     color: Configuration.theme.semiTransparentLightGrayColor
-    radius: Configuration.r3Radius
-    border.width: Configuration.scale(6)
-    border.color: Configuration.theme.semiTransparentMutedWhiteColor
+    radius: Configuration.r3RadiusStatic
+    border.width: 3
+    border.color: Configuration.theme.semiTransparentLightGrayColor
 
     Image {
         id: coverMock // заглушка с вопросительным знаком, если нет обложки
         anchors.fill: parent
-        anchors.margins: Configuration.scale(100)
+        anchors.margins: 100
         source: "img/unknown_icon_pic.png"
 
         layer.enabled: true

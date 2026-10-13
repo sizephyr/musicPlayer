@@ -10,53 +10,62 @@ Item {
     default property alias content: contentRect.data
 
     Rectangle {
-        id: contentRect
-        anchors.fill: parent
-        anchors.margins: Configuration.scale(100)
-        anchors.leftMargin: 0
+        anchors.centerIn: parent
+        width: 500
+        height: 500
+        // color: Configuration.theme.semiTransparentGrayColor
+        color: "transparent"
 
-        border.width: Configuration.scale(6)
-        border.color: Configuration.theme.semiTransparentMutedWhiteColor
-        color: Configuration.theme.semiTransparentLightGrayColor
-        radius: Configuration.r3Radius
+        Rectangle {
+            id: contentRect
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width * 0.75
+            height: parent.height * 0.9
 
-        ListView {
-            id: view
+            border.width: 1
+            border.color: Configuration.theme.semiTransparentLightGrayColor
+            color: Configuration.theme.semiTransparentLightGrayColor
+            radius: Configuration.r3RadiusStatic
 
-            anchors.fill: parent
-            anchors.margins: parent.radius
-            clip: true
-            spacing: Configuration.scale(6)
+            ListView {
+                id: view
 
-            model: root.model.playListModel
+                anchors.fill: parent
+                anchors.margins: parent.radius
+                clip: true
+                spacing: Configuration.scale(6)
 
-            delegate: PlayListItem {
-                width: view.width
-                height: (view.height - view.anchors.margins * 2) / 7
-                horizontalPaddings: view.anchors.margins
-                text: model.trackArtist + " - " + model.trackTitle
-                selected: model.uid === root.model.playListModel.currentTrackUid
+                model: root.model.playListModel
 
-                onSelect: {
-                    root.model.play(uid);
+                delegate: PlayListItem {
+                    width: view.width
+                    height: (view.height - view.anchors.margins * 2) / 7
+                    horizontalPaddings: view.anchors.margins
+                    text: model.trackArtist + " - " + model.trackTitle
+                    selected: model.uid === root.model.playListModel.currentTrackUid
+
+                    onSelect: {
+                        root.model.play(uid);
+                    }
                 }
             }
         }
-    }
 
-    Connections {
-        target: root.model
+        Connections {
+            target: root.model
 
-        function onPlayed(uid) {
-            let trackPath = root?.model?.trackPathOf(uid) ?? "";
+            function onPlayed(uid) {
+                let trackPath = root?.model?.trackPathOf(uid) ?? "";
 
-            if (trackPath !== "") {
-                SomeMediaPlayer.source = "file://" + trackPath;
-                SomeMediaPlayer.play();
-            } else {
-                // TODO
-                // playContext.coverSource = "";
-                SomeMediaPlayer.stop();
+                if (trackPath !== "") {
+                    SomeMediaPlayer.source = "file://" + trackPath;
+                    SomeMediaPlayer.play();
+                } else {
+                    // TODO
+                    // playContext.coverSource = "";
+                    SomeMediaPlayer.stop();
+                }
             }
         }
     }

@@ -8,11 +8,11 @@ Item {
 
     ColumnLayout {
         anchors.fill: parent
-        spacing: Configuration.scale(5)
+        spacing: 5
 
         PlayProgressBarTimersLine {
             Layout.fillWidth: true
-            Layout.preferredHeight: Configuration.scale(15)
+            Layout.preferredHeight: 15
             hovered: playProgressBar.hovered
         }
 
@@ -20,7 +20,7 @@ Item {
             id: playProgressBar
 
             Layout.fillWidth: true
-            Layout.preferredHeight: Configuration.scale(15)
+            Layout.preferredHeight: 15
         }
     }
 }

@@ -7,9 +7,9 @@ Rectangle {
 
     property bool hovered: hoverHandler.hovered
 
-    border.width: 2
-    border.color: Configuration.theme.semiTransparentMutedWhiteColor
-    radius: Configuration.r3Radius
+    border.width: 1
+    border.color: Configuration.theme.semiTransparentLightGrayColor
+    radius: Configuration.r3RadiusStatic
 
     readonly property double progressBegin: 0.0
     property double progress: SomeMediaPlayer.progressRatio

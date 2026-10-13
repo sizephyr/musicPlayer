@@ -15,7 +15,7 @@ Item {
     Rectangle {
         anchors.fill: parent
 
-        radius: Math.max(0, Configuration.r3Radius - root.radiusCorrecting)
+        radius: Math.max(0, Configuration.r3RadiusStatic - root.radiusCorrecting)
         color: Configuration.theme.semiTransparentLightGrayColor
 
         RowLayout {
@@ -39,7 +39,7 @@ Item {
                 BasePlayingActionsButton {
                     id: playPauseButton
                     anchors.centerIn: parent
-                    width: Configuration.scale(110)
+                    width: 110
                     height: width
                     icon.source: SomeMediaPlayer.playing ? "img/pause_pic.png" : "img/play_pic.png"
 

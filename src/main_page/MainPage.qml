@@ -15,18 +15,22 @@ BaseActionBackgroundRect {
     property MainPageModel model: MainPageModel {}
 
     RowLayout {
-        anchors.fill: parent
-        spacing: Configuration.scale(100)
+        anchors.centerIn: parent
+        width: Configuration.referenceWindowWidth()
+        height: Configuration.referenceWindowHeight()
+        spacing: 250
 
         PlayContext {
             id: playContext
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
             model: root.model.playContextModel
         }
         PlayList {
             Layout.fillHeight: true
             Layout.fillWidth: true
+            Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
 
             model: root.model
 

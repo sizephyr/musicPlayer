@@ -8,16 +8,19 @@ Item {
 
     property PlayContextModel model
 
-    Item {
-        anchors.fill: parent
-        anchors.bottomMargin: Configuration.scale(100)
-        anchors.topMargin: Configuration.scale(40)
-        anchors.rightMargin: 0
-        anchors.leftMargin: Configuration.scale(50)
+    Rectangle {
+        anchors.centerIn: parent
+        width: 500
+        height: 500
+        // color: Configuration.theme.semiTransparentGrayColor
+        color: "transparent"
 
         ColumnLayout {
-            anchors.fill: parent
-            anchors.bottomMargin: Configuration.scale(25)
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: parent.width * 0.75
+            height: width
+
             spacing: Configuration.scale(0)
 
             Item {
@@ -26,14 +29,9 @@ Item {
 
                 PlayContextCover {
                     id: cover
-                    anchors.right: parent.right
-                    anchors.bottom: parent.bottom
-                    anchors.rightMargin: Configuration.scale(15)
-                    anchors.bottomMargin: Configuration.scale(5)
-                    width: parent.width * 0.8
-                    height: width
-
                     source: root.model.coverSource
+                    anchors.fill: parent
+                    anchors.margins: 30
 
                     // след/пред трек, плей/пауза
                     PlayContextBasePlayingActions {
@@ -55,7 +53,7 @@ Item {
             PlayProgressBar {
                 id: playProgressBar
                 Layout.fillWidth: true
-                Layout.leftMargin: Configuration.scale(50)
+                // Layout.leftMargin: Configuration.scale(50)
             }
         }
     }

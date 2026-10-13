@@ -11,7 +11,7 @@ Label {
     signal select
 
     verticalAlignment: Text.AlignVCenter
-    font.pointSize: Configuration.regularTextPointSize
+    font.pointSize: Configuration.regularTextPointSizeStatic
     color: Configuration.theme.darkGrayColor
     font.bold: root.selected
     leftPadding: horizontalPaddings
