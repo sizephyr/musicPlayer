@@ -11,10 +11,12 @@ namespace Configuration {
 
 class Base : public QObject {
   Q_OBJECT
+  QML_NAMED_ELEMENT(ConfigurationBase)
+
   Q_PROPERTY(QSize displaySize READ displaySize WRITE setDisplaySize NOTIFY
                  displaySizeChanged)
   Q_PROPERTY(double scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
-  QML_NAMED_ELEMENT(ConfigurationBase)
+  Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
  public:
   explicit Base(QObject* parent = nullptr);
 
@@ -29,6 +31,7 @@ class Base : public QObject {
   void setDisplaySize(QSize);
   [[nodiscard]] QSize displaySize() const;
   [[nodiscard]] double scaleFactor() const;
+  [[nodiscard]] static Qt::WindowFlags windowFlags();
 
  signals:
   void connectionConfiguredChanged();

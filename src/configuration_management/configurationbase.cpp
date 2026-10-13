@@ -250,6 +250,18 @@ double Base::scaleFactor() const {
   return average(displaySize()) / average(referenceDisplaySize);
 }
 
+Qt::WindowFlags Base::windowFlags() {
+  {
+#if defined(Q_OS_LINUX)
+    return Qt::Window | Qt::FramelessWindowHint;
+#elif defined(Q_OS_MAC)
+    return Qt::Window;
+#else
+    return Qt::Window;
+#endif
+  }
+}
+
 QSize Base::displaySize() const { return _displaySize.value_or({}); }
 
 }  // namespace Configuration

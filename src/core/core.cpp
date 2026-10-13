@@ -20,13 +20,3 @@ void Core::setConfiguredState(bool configured) {
 }
 
 bool Core::connectionConfigured() const { return _configured; }
-
-Qt::WindowFlags Core::windowFlags() {
-#if defined(Q_OS_LINUX)
-  return Qt::Window | Qt::FramelessWindowHint;
-#elif defined(Q_OS_MAC)
-  return Qt::Window;
-#else
-  return Qt::Window;
-#endif
-}

@@ -14,10 +14,13 @@ qt_add_qml_module(
   STATIC
   QML_FILES
   Main.qml
+  SOURCES
+  windowhelper.h
+  windowhelper.cpp
   RESOURCES
   ../img/base_background.jpg)
 
-target_link_libraries(main PRIVATE themesplugin configurationplugin)
+target_link_libraries(main PRIVATE Qt6::Quick themesplugin configurationplugin)
 
 install(
   TARGETS mainplugin

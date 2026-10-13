@@ -23,7 +23,7 @@ Window {
     property bool isAdjusting: false
 
     Component.onCompleted: {
-        root.flags = core.windowFlags;
+        root.flags = Configuration.windowFlags;
     }
     Binding {
         target: Configuration
@@ -44,7 +44,7 @@ Window {
             anchors.fill: parent
             source: "file:" + Configuration.windowBackground()
 
-            visible: false
+            visible: !!(root.flags & Qt.FramelessWindowHint)
         }
 
         Rectangle {
@@ -53,13 +53,13 @@ Window {
             radius: Configuration.r5Radius
             color: "black"
             visible: false
-            layer.enabled: true
+            layer.enabled: root.flags & Qt.FramelessWindowHint
         }
 
         MultiEffect {
             anchors.fill: backgroundImage
             source: backgroundImage
-            maskEnabled: true
+            maskEnabled: root.flags & Qt.FramelessWindowHint
             maskSource: backgroundImageMaskRectangle
         }
 
