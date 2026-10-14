@@ -224,17 +224,11 @@ std::optional<std::filesystem::path> FileManageBackend::getCoverImagePath(
   return std::filesystem::path(tempPath.toStdString());
 }
 
-QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
+QCoro::Task<std::expected<void, QString>>
+FileManageBackend::fillCoverImagePathByFfmpegCLI(
     std::shared_ptr<const Common::Mp3Description> descr,
     std::filesystem::path targetImagePath) {
   QProcess process;
-
-  // Исправлено формирование пути: расширение .png добавлено в саму строку
-  // формата
-  // const auto targetImagePath = QStringLiteral("%1/%2.png")
-  //                                  .arg(QStandardPaths::writableLocation(
-  //                                           QStandardPaths::TempLocation),
-  //                                       descr->uid().toString(QUuid::WithoutBraces));
 
   // Настраиваем исполняемый файл и аргументы команды
   process.setProgram(QStringLiteral("ffmpeg"));
@@ -254,14 +248,16 @@ QCoro::Task<> FileManageBackend::fillCoverImagePathByFfmpegCLI(
   process.start();
 
   if (!co_await qCoro(process).waitForStarted()) {
-    qWarning() << "Не удалось запустить процесс ffmpeg!";
-    co_return;
+    co_return std::unexpected("Не удалось запустить процесс ffmpeg!");
   }
 
   co_await qCoro(process).waitForFinished();
 
   // Проверяем результаты выполнения
   if (process.exitStatus() == QProcess::NormalExit && process.exitCode() != 0) {
-    qWarning() << "Ошибка выполнения ffmpeg:" << process.readAllStandardError();
+    co_return std::unexpected("Ошибка выполнения ffmpeg: " +
+                              process.readAllStandardError());
   }
+
+  co_return {};
 }

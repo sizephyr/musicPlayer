@@ -40,7 +40,7 @@ Item {
                         radiusCorrecting: parent.border.width
 
                         model: root.model
-                        visible: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
+                        canShow: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
                     }
                 }
 

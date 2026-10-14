@@ -3,6 +3,11 @@
 #include <filemanagebackend.h>
 
 #include <QDir>
+#include <QLoggingCategory>
+
+namespace {
+const auto loggingCategory = QLoggingCategory("play_context_model");
+}
 
 PlayContextModel::PlayContextModel(QObject* parent)
     : QObject{parent},
@@ -13,7 +18,10 @@ PlayContextModel::PlayContextModel(QObject* parent)
 }
 
 QString PlayContextModel::coverSource() const {
-  return QStringLiteral("file://") + _currentTrackCover->fileName();
+  if (_currentTrackCover->exists()) {
+    return QStringLiteral("file://") + _currentTrackCover->fileName();
+  }
+  return "";
 }
 
 void PlayContextModel::setCurrentTrack(
@@ -33,7 +41,9 @@ void PlayContextModel::resetCurrentTrack() {
 bool PlayContextModel::contextCompletted() const { return _contextCompletted; }
 
 void PlayContextModel::setContextCompletted(bool newContextCompletted) {
-  if (_contextCompletted == newContextCompletted) return;
+  if (_contextCompletted == newContextCompletted) {
+    return;
+  }
   _contextCompletted = newContextCompletted;
   emit contextComplettedChanged();
 }
@@ -44,9 +54,14 @@ QCoro::Task<> PlayContextModel::provideCover() {
              << _currentTrackCover->filesystemFileName().c_str();
     auto cleanup = qScopeGuard([this] { _currentTrackCover->close(); });
     // попытка изъять обложку с помощью ffmpeg, потому что она прячется
-    //  как долбанный видеопоток!
-    co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
-        _currentTrack, _currentTrackCover->filesystemFileName());
+    // как долбаный видеопоток!
+    if (auto fillingResult =
+            co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
+                _currentTrack, _currentTrackCover->filesystemFileName());
+        !fillingResult) {
+      qCWarning(loggingCategory) << fillingResult.error();
+      _currentTrackCover->remove();
+    }
   }
 
   emit coverSourceChanged();

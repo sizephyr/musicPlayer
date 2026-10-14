@@ -6,8 +6,11 @@ import modules.main_page
 Item {
     id: root
 
+    opacity: canShow ? 1.0 : 0.0
+
     property int radiusCorrecting
     property PlayContextModel model
+    property bool canShow: true
 
     Rectangle {
         anchors.fill: parent
@@ -57,6 +60,13 @@ Item {
                     enabled: (root?.model.nextTrackAvailable) ?? false
                 }
             }
+        }
+    }
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Configuration.animationDurationMs
+            easing.type: Easing.InOutQuad
         }
     }
 }
