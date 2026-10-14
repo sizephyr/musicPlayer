@@ -45,7 +45,8 @@ qt_add_qml_module(
   QML_FILES
   PlayProgressBarTimersLine.qml
   QML_FILES
-  PlayProgressBarTimeline.qml)
+  PlayProgressBarTimeline.qml
+  QML_FILES VolumeControl.qml)
 
 target_link_libraries(
   main_page

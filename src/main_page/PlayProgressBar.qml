@@ -1,6 +1,5 @@
 import QtQuick
 import QtQuick.Layouts
-import modules.configuration
 import modules.main_page
 
 Item {

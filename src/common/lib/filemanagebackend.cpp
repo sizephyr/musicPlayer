@@ -32,35 +32,50 @@ auto parseNormalInt = [](const char* bytes) -> int {
 
 std::expected<QList<std::filesystem::path>, QString>
 FileManageBackend::filesSearch(const QString& path) {
-  const std::filesystem::path directoryPath =
+  const std::filesystem::path targetPath =
       QUrl(path).toLocalFile().toStdString();
 
-  // qCDebug(loggingCategory) << "Original path:" << path;
-  qCInfo(loggingCategory) << "Directory path:" << directoryPath;
+  qCInfo(loggingCategory) << "Target path:" << targetPath;
 
-  const QDir directory(directoryPath);
-  if (!directory.exists()) {
-    return std::unexpected(QStringLiteral("Directory does not exist: ") +
-                           directoryPath.c_str());
-  }
-
-  const QStringList entries =
-      directory.entryList({QStringLiteral("*.mp3")}, QDir::Files);
-
-  // qCDebug(loggingCategory) << "Files found:" << entries;
-
-  if (entries.isEmpty()) {
-    return std::unexpected(QStringLiteral("No MP3 files found in directory."));
+  std::error_code ec;
+  if (!std::filesystem::exists(targetPath, ec)) {
+    return std::unexpected(QStringLiteral("Path does not exist: ") +
+                           QString::fromStdString(targetPath.string()));
   }
 
   QList<std::filesystem::path> result;
-  result.reserve(entries.size());
-  std::ranges::transform(entries, std::back_inserter(result),
-                         [directoryPath](const auto& entry) {
-                           return directoryPath / entry.toStdString();
-                         });
 
-  return result;
+  if (std::filesystem::is_regular_file(targetPath, ec)) {
+    if (targetPath.extension() == ".mp3") {
+      result.append(targetPath);
+      return result;
+    }
+    return std::unexpected(QStringLiteral("Provided file is not an MP3 file."));
+  }
+
+  if (std::filesystem::is_directory(targetPath, ec)) {
+    auto mp3FilesView =
+        std::filesystem::directory_iterator(
+            targetPath,
+            std::filesystem::directory_options::skip_permission_denied) |
+        std::views::filter(
+            [](const auto& entry) { return entry.is_regular_file(); }) |
+        std::views::filter([](const auto& entry) {
+          return entry.path().extension() == ".mp3";
+        }) |
+        std::views::transform([](const auto& entry) { return entry.path(); });
+
+    std::ranges::copy(mp3FilesView, std::back_inserter(result));
+
+    if (result.isEmpty()) {
+      return std::unexpected(
+          QStringLiteral("No MP3 files found in directory."));
+    }
+
+    return result;
+  }
+
+  return std::unexpected(QStringLiteral("Unsupported file system object."));
 }
 
 std::shared_ptr<Common::Mp3Description> FileManageBackend::parseMp3(

@@ -15,10 +15,12 @@ Model::Model(QObject* parent)
     : QObject{parent},
       _playListModel(new PlayListModel(this)),
       _playContextModel(new PlayContextModel(this)) {
-  // connect(this, &Model::played, this, [this](auto uid) {
-  //   _playContextModel->setCurrentTrack(
-  //       _playListModel->mp3DescriptionByTrackUid(uid));
-  // });
+  connect(this, &Model::played, this, [this](auto uid) {
+    _playContextModel->setPreviousTrackAvailability(
+        _playListModel->previousTrackAvailable(uid));
+    _playContextModel->setNextTrackAvailability(
+        _playListModel->nextTrackAvailable(uid));
+  });
   connect(_playContextModel, &PlayContextModel::playNext, this,
           [this] { playNext(_playListModel->currentTrackUid()); });
   connect(_playContextModel, &PlayContextModel::playPrevious, this,

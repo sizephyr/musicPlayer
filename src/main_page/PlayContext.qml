@@ -37,12 +37,23 @@ Item {
                     PlayContextBasePlayingActions {
                         anchors.fill: parent
                         anchors.margins: parent.border.width
-                        visible: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
                         radiusCorrecting: parent.border.width
-                        onPlayNextClicked: root.model.playNext()
-                        onPlayPreviousClicked: root.model.playPrevious()
-                        onPlayPauseClicked: SomeMediaPlayer.playing ? SomeMediaPlayer.pause() : SomeMediaPlayer.play()
+
+                        model: root.model
+                        visible: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
                     }
+                }
+
+                VolumeControl {
+                    anchors.top: parent.top
+                    anchors.right: cover.left
+                    anchors.bottom: parent.bottom
+                    anchors.topMargin: 100 + cover.anchors.margins
+                    anchors.bottomMargin: cover.anchors.margins + 5
+                    anchors.rightMargin: 5
+                    height: cover.height
+                    width: 25
+                    canShow: hoverHandler.hovered
                 }
 
                 HoverHandler {
@@ -53,7 +64,6 @@ Item {
             PlayProgressBar {
                 id: playProgressBar
                 Layout.fillWidth: true
-                // Layout.leftMargin: Configuration.scale(50)
             }
         }
     }

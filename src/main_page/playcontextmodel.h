@@ -14,15 +14,24 @@ class PlayContextModel : public QObject {
   Q_PROPERTY(QString coverSource READ coverSource NOTIFY coverSourceChanged)
   Q_PROPERTY(bool contextCompletted READ contextCompletted NOTIFY
                  contextComplettedChanged)
+  Q_PROPERTY(bool previousTrackAvailable READ previousTrackAvailable NOTIFY
+                 previousTrackAvailableChanged)
+  Q_PROPERTY(bool nextTrackAvailable READ nextTrackAvailable NOTIFY
+                 nextTrackAvailableChanged)
  public:
   explicit PlayContextModel(QObject* parent = nullptr);
 
-  QString coverSource() const;
+  [[nodiscard]] QString coverSource() const;
   void setCurrentTrack(std::shared_ptr<Common::Mp3Description> newCurrentTrack);
   void resetCurrentTrack();
 
-  bool contextCompletted() const;
+  [[nodiscard]] bool contextCompletted() const;
   void setContextCompletted(bool newContextCompletted);
+
+  [[nodiscard]] bool previousTrackAvailable() const;
+  void setPreviousTrackAvailability(bool);
+  [[nodiscard]] bool nextTrackAvailable() const;
+  void setNextTrackAvailability(bool);
 
  signals:
   void callCoverSourceProviding();
@@ -30,6 +39,8 @@ class PlayContextModel : public QObject {
   void contextComplettedChanged();
   void playNext();
   void playPrevious();
+  void previousTrackAvailableChanged();
+  void nextTrackAvailableChanged();
 
  private slots:
   [[nodiscard]] QCoro::Task<> provideCover();
@@ -38,4 +49,6 @@ class PlayContextModel : public QObject {
   bool _contextCompletted;
   std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
   QTemporaryFile* _currentTrackCover{nullptr};
+  bool _previousTrackAvailable;
+  bool _nextTrackAvailable;
 };

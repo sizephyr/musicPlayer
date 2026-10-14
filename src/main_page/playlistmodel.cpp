@@ -81,6 +81,19 @@ std::shared_ptr<Common::Mp3Description> PlayListModel::next(
   return *std::next(it);
 }
 
+bool PlayListModel::nextTrackAvailable(QUuid currentDescrUid) {
+  auto it =
+      std::ranges::find_if(_container, [currentDescrUid](const auto& item) {
+        return item->uid() == currentDescrUid;
+      });
+
+  if (it == _container.end() || std::next(it) == _container.end()) {
+    return false;
+  }
+
+  return true;
+}
+
 std::shared_ptr<Common::Mp3Description> PlayListModel::previous(
     QUuid currentDescrUid) {
   auto it =
@@ -93,6 +106,19 @@ std::shared_ptr<Common::Mp3Description> PlayListModel::previous(
   }
 
   return *std::prev(it);
+}
+
+bool PlayListModel::previousTrackAvailable(QUuid currentDescrUid) {
+  auto it =
+      std::ranges::find_if(_container, [currentDescrUid](const auto& item) {
+        return item->uid() == currentDescrUid;
+      });
+
+  if (it == _container.end() || it == _container.begin()) {
+    return false;
+  }
+
+  return true;
 }
 
 std::shared_ptr<Common::Mp3Description> PlayListModel::currentTrack() const {

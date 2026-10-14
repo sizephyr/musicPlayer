@@ -39,9 +39,11 @@ class PlayListModel : public QAbstractListModel {
   /// \brief возвращает описание следующего трека, расположенного в списке после
   /// того, чей UID передан в качестве аргумента
   [[nodiscard]] std::shared_ptr<Common::Mp3Description> next(QUuid);
+  [[nodiscard]] bool nextTrackAvailable(QUuid);
   /// \brief возвращает описание следующего трека, расположенного в списке перед
   /// того, чей UID передан в качестве аргумента
   [[nodiscard]] std::shared_ptr<Common::Mp3Description> previous(QUuid);
+  [[nodiscard]] bool previousTrackAvailable(QUuid);
 
   std::shared_ptr<Common::Mp3Description> currentTrack() const;
   void setCurrentTrack(std::shared_ptr<Common::Mp3Description> newCurrentTrack);

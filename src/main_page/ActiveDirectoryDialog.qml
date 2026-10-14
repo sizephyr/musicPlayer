@@ -1,10 +1,6 @@
 import QtCore
 import QtQuick
 import QtQuick.Dialogs
-import QtQuick.Layouts
-import modules.common
-import modules.configuration
-import modules.main_page
 
 Item {
     id: root

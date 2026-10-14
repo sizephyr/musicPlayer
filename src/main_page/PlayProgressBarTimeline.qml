@@ -51,10 +51,17 @@ Rectangle {
         id: hoverHandler
     }
 
-    TapHandler {
-        onTapped: eventPoint => {
-            SomeMediaPlayer.position = //
-            SomeMediaPlayer.getPositionFromRatio(root.getProgressRatio(eventPoint.position.x));
+    // смещение времени воспроизведения трека нажитем и перетаскиванием
+    PointHandler {
+        id: trackHandler
+        target: null // Предотвращаем автоматическое смещение Rectangle
+
+        onPointChanged: {
+            if (trackHandler.active) {
+                let currentX = trackHandler.point.position.x;
+
+                SomeMediaPlayer.position = SomeMediaPlayer.getPositionFromRatio(root.getProgressRatio(currentX));
+            }
         }
     }
 

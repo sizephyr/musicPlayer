@@ -51,3 +51,21 @@ QCoro::Task<> PlayContextModel::provideCover() {
 
   emit coverSourceChanged();
 }
+
+bool PlayContextModel::previousTrackAvailable() const {
+  return _previousTrackAvailable;
+}
+
+void PlayContextModel::setPreviousTrackAvailability(bool isAvailable) {
+  _previousTrackAvailable = isAvailable;
+  emit previousTrackAvailableChanged();
+}
+
+bool PlayContextModel::nextTrackAvailable() const {
+  return _nextTrackAvailable;
+}
+
+void PlayContextModel::setNextTrackAvailability(bool isAvailable) {
+  _nextTrackAvailable = isAvailable;
+  emit nextTrackAvailableChanged();
+}

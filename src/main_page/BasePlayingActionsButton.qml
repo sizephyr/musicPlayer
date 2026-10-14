@@ -10,7 +10,7 @@ Button {
 
     icon.width: width * 0.8
     icon.height: height * 0.8
-    icon.color: Configuration.theme.darkGrayColor
+    icon.color: root.enabled ? Configuration.theme.darkGrayColor : Configuration.theme.semiTransparentDarkGrayColor
 
     background: Rectangle {
         color: "transparent"

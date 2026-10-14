@@ -7,10 +7,7 @@ Item {
     id: root
 
     property int radiusCorrecting
-
-    signal playPauseClicked
-    signal playNextClicked
-    signal playPreviousClicked
+    property PlayContextModel model
 
     Rectangle {
         anchors.fill: parent
@@ -29,7 +26,8 @@ Item {
                     width: playPauseButton.width * 0.7
                     height: width
                     icon.source: "img/previous_track_pic.png"
-                    onClicked: root.playPreviousClicked()
+                    onClicked: root.model.playPrevious()
+                    enabled: (root?.model.previousTrackAvailable) ?? false
                 }
             }
             Item {
@@ -43,7 +41,7 @@ Item {
                     height: width
                     icon.source: SomeMediaPlayer.playing ? "img/pause_pic.png" : "img/play_pic.png"
 
-                    onClicked: root.playPauseClicked()
+                    onClicked: SomeMediaPlayer.playing ? SomeMediaPlayer.pause() : SomeMediaPlayer.play()
                 }
             }
             Item {
@@ -55,7 +53,8 @@ Item {
                     width: playPauseButton.width * 0.7
                     height: width
                     icon.source: "img/next_track_pic.png"
-                    onClicked: root.playNextClicked()
+                    onClicked: root.model.playNext()
+                    enabled: (root?.model.nextTrackAvailable) ?? false
                 }
             }
         }
