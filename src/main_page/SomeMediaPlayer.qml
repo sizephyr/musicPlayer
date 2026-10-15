@@ -9,8 +9,6 @@ MediaPlayer {
     property double progressRatio: getProgressRatio(position)
 
     audioOutput: AudioOutput {
-        // TODO: привязать значение громкости из ProgressBar
-        // volume: volumeSlider.value
         volume: 0.1
     }
 

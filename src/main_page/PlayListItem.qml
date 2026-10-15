@@ -22,14 +22,14 @@ Label {
         border.width: 1
         border.color: root.selected ? Configuration.theme.darkGrayColor : Configuration.theme.semiTransparentLightGrayColor
         color: "transparent"
-        radius: Configuration.r5Radius
+        radius: Configuration.r5RadiusStatic
     }
 
     Button {
         anchors.fill: parent
         background: Rectangle {
             color: "transparent"
-            radius: Configuration.r5Radius
+            radius: Configuration.r5RadiusStatic
         }
         onClicked: root.select()
     }
