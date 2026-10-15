@@ -17,11 +17,6 @@ Window {
 
     property bool closeWindow: false
 
-    readonly property double aspectRatio: 16.0 / 9.0
-
-    // Флаг для предотвращения бесконечной рекурсии сигналов
-    property bool isAdjusting: false
-
     Component.onCompleted: {
         root.flags = Configuration.windowFlags;
     }
@@ -44,13 +39,13 @@ Window {
             anchors.fill: parent
             source: "file:" + Configuration.windowBackground()
 
-            visible: !!(root.flags & Qt.FramelessWindowHint)
+            visible: !(root.flags & Qt.FramelessWindowHint)
         }
 
         Rectangle {
             id: backgroundImageMaskRectangle
             anchors.fill: backgroundImage
-            radius: Configuration.r5Radius
+            radius: Configuration.windowFlags & Qt.FramelessWindowHint ? Configuration.r5Radius : 0
             color: "black"
             visible: false
             layer.enabled: root.flags & Qt.FramelessWindowHint
@@ -86,24 +81,6 @@ Window {
 
         function onLastPageClosed() {
             root.close();
-        }
-    }
-
-    onWidthChanged: {
-        if (!isAdjusting) {
-            isAdjusting = true;
-            // Корректируем высоту под ширину
-            root.height = Math.round(root.width / aspectRatio);
-            isAdjusting = false;
-        }
-    }
-
-    onHeightChanged: {
-        if (!isAdjusting) {
-            isAdjusting = true;
-            // Корректируем ширину под высоту
-            root.width = Math.round(root.height * aspectRatio);
-            isAdjusting = false;
         }
     }
 }

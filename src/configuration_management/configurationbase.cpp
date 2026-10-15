@@ -78,6 +78,7 @@ void Base::load() {
 
   std::error_code ec;
   const auto canonicalPath = std::filesystem::canonical(configPath, ec);
+  qCInfo(loggingCategory) << "Загрузка конфигурации из файла " << canonicalPath;
 
   if (ec) {
     throw std::runtime_error(
