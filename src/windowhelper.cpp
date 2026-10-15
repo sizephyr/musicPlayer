@@ -1,4 +1,4 @@
-#include "WindowHelper.h"
+#include "windowhelper.h"
 
 #ifdef Q_OS_MAC
 #include <objc/message.h>
