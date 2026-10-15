@@ -5,7 +5,7 @@ Rectangle {
     id: root
 
     color: Configuration.theme.semiTransparentGrayColor
-    radius: Configuration.windowFlags & Qt.FramelessWindowHint ? Configuration.r5Radius : 0
+    radius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) ? Configuration.r5RadiusStatic : 0
 
     property bool onCloseProcess: false
     // функция, которая будет единоразово вызвана после проигрывания анимации скрытия

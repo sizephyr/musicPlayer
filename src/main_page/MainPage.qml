@@ -6,7 +6,6 @@ import modules.main_page
 
 BaseActionBackgroundRect {
     id: root
-    clip: true
 
     Component.onCompleted: {
         model.setPlayer(SomeMediaPlayer);

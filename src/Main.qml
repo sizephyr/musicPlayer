@@ -7,13 +7,14 @@ import modules.core
 
 Window {
     id: root
-    objectName: "mainWindow"
     width: Configuration.displaySize.width
     height: Configuration.displaySize.height
     minimumWidth: Configuration.referenceWindowWidth()
     minimumHeight: Configuration.referenceWindowHeight()
+    flags: Configuration.windowFlags
 
     visible: true
+    color: "transparent"
 
     property bool closeWindow: false
 
@@ -45,7 +46,9 @@ Window {
         Rectangle {
             id: backgroundImageMaskRectangle
             anchors.fill: backgroundImage
-            radius: Configuration.windowFlags & Qt.FramelessWindowHint ? Configuration.r5Radius : 0
+            radius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) //
+            ? Configuration.r5RadiusStatic //
+            : 0
             color: "black"
             visible: false
             layer.enabled: root.flags & Qt.FramelessWindowHint
@@ -54,7 +57,7 @@ Window {
         MultiEffect {
             anchors.fill: backgroundImage
             source: backgroundImage
-            maskEnabled: root.flags & Qt.FramelessWindowHint
+            maskEnabled: !!(Configuration.windowFlags & Qt.FramelessWindowHint)
             maskSource: backgroundImageMaskRectangle
         }
 
