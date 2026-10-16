@@ -26,6 +26,7 @@ qt_add_qml_module(
   StatusLabel.qml
   BaseTextInput.qml
   BaseTextArea.qml
+  BaseSlider.qml
   SOURCES
   basebuttonstyle.h
   pageclosingcontext.h

@@ -1,6 +1,7 @@
 import QtQuick
-import QtQuick.Controls
+import QtQuick.Controls.Basic
 import modules.configuration
+import modules.settings_page
 import modules.page_manager
 import modules.core
 
@@ -41,6 +42,37 @@ Window {
         anchors.fill: parent
         source: PageManager.currentPageContextModel //
         ? PageManager.currentPageContextModel.pageSource : ""
+    }
+
+    SettingsPage {
+        id: settingsPage
+
+        width: Configuration.referenceWindowWidth() * 0.8
+        height: Configuration.referenceWindowHeight() * 0.8
+        x: (parent.width - width) / 2
+        y: (parent.height - height) / 2
+    }
+
+    Button {
+        id: settingsButton
+
+        anchors.left: parent.left
+        anchors.bottom: parent.bottom
+        width: 40
+        height: 30
+        text: "⚙"
+        font.pointSize: Configuration.primaryTextPointSizeStatic
+        palette.buttonText: Configuration.theme.lightGrayColor
+
+        background: Rectangle {
+            bottomLeftRadius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) //
+            ? Configuration.r5RadiusStatic //
+            : 0
+            topRightRadius: Configuration.r5RadiusStatic
+            color: Configuration.theme.semiTransparentLightGrayColor
+        }
+
+        onClicked: settingsPage.open()
     }
 
     Label {

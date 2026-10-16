@@ -8,12 +8,10 @@ Item {
 
     property PlayContextModel model
 
-    Rectangle {
+    Item {
         anchors.centerIn: parent
         width: 500
         height: 500
-        // color: Configuration.theme.semiTransparentGrayColor
-        color: "transparent"
 
         ColumnLayout {
             anchors.right: parent.right

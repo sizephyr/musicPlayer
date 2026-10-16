@@ -26,11 +26,11 @@ QtObject {
     readonly property color yellowColor: "#fecc00"
     readonly property color lightYellowColor: "#fffbe6"
 
-    readonly property color semiTransparentWhiteColor: "#aaffffff"
-    readonly property color semiTransparentGrayColor: "#aa7e8798"
-    readonly property color semiTransparentDarkGrayColor: "#aa39414a"
-    readonly property color semiTransparentMutedWhiteColor: "#aafbfbfd"
-    readonly property color semiTransparentLightGrayColor: "#77eceef4"
+    readonly property color semiTransparentWhiteColor: extrapolateAlpha(whiteColor, 0.5)
+    readonly property color semiTransparentGrayColor: extrapolateAlpha(grayColor, 0.5)
+    readonly property color semiTransparentDarkGrayColor: extrapolateAlpha(darkGrayColor, 0.5)
+    readonly property color semiTransparentMutedWhiteColor: extrapolateAlpha(mutedWhiteColor, 0.5)
+    readonly property color semiTransparentLightGrayColor: extrapolateAlpha(lightGrayColor, 0.5)
 
     property double backgroundTransparentnesRatio: 0.5
 

@@ -3,6 +3,8 @@ import QtQuick.Effects
 import modules.configuration
 
 Item {
+    id: root
+
     Image {
         id: backgroundImage
         anchors.fill: parent

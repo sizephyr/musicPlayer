@@ -37,6 +37,7 @@ ConfigurationBase {
     readonly property int r3RadiusStatic: 20
     readonly property int r4RadiusStatic: 15
     readonly property int r5RadiusStatic: 10
+    readonly property int r6RadiusStatic: 5
 
     readonly property int primaryTextPointSize: scale(primaryTextPointSizeStatic) // осбоважный укрупнённый текст
     readonly property int regularTextPointSize: scale(regularTextPointSizeStatic) // базовый текст

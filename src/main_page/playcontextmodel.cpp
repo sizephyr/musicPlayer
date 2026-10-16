@@ -50,8 +50,6 @@ void PlayContextModel::setContextCompletted(bool newContextCompletted) {
 
 QCoro::Task<> PlayContextModel::provideCover() {
   if (_currentTrack != nullptr && _currentTrackCover->open()) {
-    qDebug() << "::::" << _currentTrackCover->fileName()
-             << _currentTrackCover->filesystemFileName().c_str();
     auto cleanup = qScopeGuard([this] { _currentTrackCover->close(); });
     // попытка изъять обложку с помощью ffmpeg, потому что она прячется
     // как долбаный видеопоток!

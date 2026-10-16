@@ -32,6 +32,7 @@ add_subdirectory(src/core)
 add_subdirectory(src/page_manager)
 add_subdirectory(src/notify_manager)
 add_subdirectory(src/main_page)
+add_subdirectory(src/settings_page)
 
 qt_add_executable(musicPlayer MACOSX_BUNDLE src/main.cpp)
 

@@ -12,7 +12,7 @@ Item {
         PlayProgressBarTimersLine {
             Layout.fillWidth: true
             Layout.preferredHeight: 15
-            hovered: playProgressBar.hovered
+            hovered: playProgressBar.hoverHandler.hovered
         }
 
         PlayProgressBarTimeline {

@@ -14,7 +14,7 @@ Item {
         anchors.centerIn: parent
         width: 500
         height: 500
-        // color: Configuration.theme.semiTransparentGrayColor
+
         color: "transparent"
 
         Rectangle {
@@ -35,7 +35,10 @@ Item {
                 anchors.fill: parent
                 anchors.margins: parent.radius
                 clip: true
-                spacing: Configuration.scale(6)
+                spacing: 6
+
+                highlightRangeMode: ListView.ApplyRange
+                highlightMoveDuration: 300
 
                 model: root.model.playListModel
 
@@ -48,6 +51,10 @@ Item {
 
                     onSelect: {
                         root.model.play(uid);
+                    }
+                    onSelectedChanged: {
+                        if (selected)
+                            view.currentIndex = index;
                     }
                 }
             }
@@ -63,8 +70,6 @@ Item {
                     SomeMediaPlayer.source = "file://" + trackPath;
                     SomeMediaPlayer.play();
                 } else {
-                    // TODO
-                    // playContext.coverSource = "";
                     SomeMediaPlayer.stop();
                 }
             }
