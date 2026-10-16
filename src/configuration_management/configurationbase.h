@@ -17,6 +17,7 @@ class Base : public QObject {
                  displaySizeChanged)
   Q_PROPERTY(double scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
   Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
+  Q_PROPERTY(QString applicationVersion READ applicationVersion CONSTANT)
  public:
   explicit Base(QObject* parent = nullptr);
 
@@ -32,6 +33,8 @@ class Base : public QObject {
   [[nodiscard]] QSize displaySize() const;
   [[nodiscard]] double scaleFactor() const;
   [[nodiscard]] static Qt::WindowFlags windowFlags();
+
+  QString applicationVersion() const;
 
  signals:
   void connectionConfiguredChanged();

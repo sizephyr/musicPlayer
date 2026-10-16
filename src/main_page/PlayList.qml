@@ -7,6 +7,7 @@ Item {
 
     // TODO: надо бы навести порядок. У плейлиста должна быть только модель плейлиста
     property MainPageModel model
+    property Item contentItem: contentRect
     default property alias content: contentRect.data
 
     Rectangle {

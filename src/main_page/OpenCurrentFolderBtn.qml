@@ -1,14 +1,9 @@
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
-import modules.common
+import QtQuick.Controls.Basic
 import modules.configuration
-import modules.main_page
 
 Button {
     id: openCurrentFolderBtn
-
-    visible: root.model.currentPlayFolder === ""
 
     background: Rectangle {
         color: "transparent"

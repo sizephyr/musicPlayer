@@ -18,7 +18,8 @@ qt_add_qml_module(
   windowhelper.h
   windowhelper.cpp
   RESOURCES
-  ../img/base_background.jpg)
+  ../img/base_background.jpg
+  QML_FILES BackgroundImage.qml)
 
 target_link_libraries(main PRIVATE Qt6::Quick themesplugin configurationplugin)
 

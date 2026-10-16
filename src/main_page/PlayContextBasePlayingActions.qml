@@ -65,7 +65,7 @@ Item {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: Configuration.animationDurationMs
+            duration: Configuration.animationDurationMs()
             easing.type: Easing.InOutQuad
         }
     }

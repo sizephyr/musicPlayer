@@ -27,6 +27,7 @@ BaseActionBackgroundRect {
             model: root.model.playContextModel
         }
         PlayList {
+            id: playListItem
             Layout.fillHeight: true
             Layout.fillWidth: true
             Layout.alignment: Qt.AlignLeft | Qt.AlignVCenter
@@ -37,9 +38,19 @@ BaseActionBackgroundRect {
                 id: openCurrentFolderBtn
                 anchors.fill: parent
                 onClicked: activeDirectoryDialog.show()
+                visible: root.model.currentPlayFolder === ""
             }
         }
     }
+    // Rectangle {
+    //     id: controls
+    //     parent: playListItem.contentItem.parent
+
+    //     anchors.top: playListItem.contentItem.top
+    //     anchors.right: playListItem.contentItem.left
+    //     anchors.bottom: playListItem.contentItem.bottom
+    //     width: 40
+    // }
 
     ActiveDirectoryDialog {
         id: activeDirectoryDialog

@@ -4,7 +4,9 @@ import modules.configuration
 Rectangle {
     id: root
 
-    color: Configuration.theme.semiTransparentGrayColor
+    color: Configuration.theme.extrapolateAlpha//
+    (Configuration.theme.grayColor, Configuration.theme.backgroundTransparentnesRatio)
+
     radius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) ? Configuration.r5RadiusStatic : 0
 
     property bool onCloseProcess: false

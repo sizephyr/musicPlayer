@@ -11,9 +11,10 @@ namespace PageManagement {
 /// \brief верхнеуровневый контекст страницы
 class PageContextModel : public QObject {
   Q_OBJECT
+  QML_NAMED_ELEMENT(PageContextModel)
+
   Q_PROPERTY(QString pageTitle READ pageTitle NOTIFY contextChanged)
   Q_PROPERTY(QUrl pageSource READ pageSource NOTIFY contextChanged)
-  QML_ELEMENT
 
  public:
   explicit PageContextModel(QObject* parent = nullptr);  // for QML

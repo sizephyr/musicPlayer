@@ -31,4 +31,14 @@ QtObject {
     readonly property color semiTransparentDarkGrayColor: "#aa39414a"
     readonly property color semiTransparentMutedWhiteColor: "#aafbfbfd"
     readonly property color semiTransparentLightGrayColor: "#77eceef4"
+
+    property double backgroundTransparentnesRatio: 0.5
+
+    function extrapolateAlpha(inputColor, transparencyFactor) {
+        var factor = Math.max(0.0, Math.min(1.0, transparencyFactor));
+
+        var targetAlpha = 1.0 - factor;
+
+        return Qt.rgba(inputColor.r, inputColor.g, inputColor.b, targetAlpha);
+    }
 }

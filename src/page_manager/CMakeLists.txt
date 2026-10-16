@@ -19,7 +19,6 @@ qt_add_qml_module(
   pagemanager.cpp
   pagetype.h
   ipagecontext.h
-  SOURCES
   ipagecontext.cpp
   pagecontextmodel.h
   pagecontextmodel.cpp

@@ -28,6 +28,7 @@ target_link_libraries(configuration PRIVATE themesplugin common_lib)
 
 target_include_directories(configurationplugin
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(configuration PRIVATE "${CMAKE_BINARY_DIR}")
 
 install(
   TARGETS configurationplugin themesplugin

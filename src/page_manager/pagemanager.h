@@ -13,16 +13,16 @@ namespace PageManagement {
 /// \brief менеджмент вкладок приложения
 class PageManager : public QObject {
   Q_OBJECT
+  QML_ELEMENT
+  QML_SINGLETON
 
-  Q_PROPERTY(PageContextModel *currentPageContextModel READ
+  Q_PROPERTY(PageContextModel* currentPageContextModel READ
                  currentPageContextModel NOTIFY currentPageChanged)
   Q_PROPERTY(bool thereIsPreviousPage READ thereIsPreviousPage NOTIFY
                  currentPageChanged)
 
-  QML_ELEMENT
-  QML_SINGLETON
  public:
-  explicit PageManager(QObject *parent = nullptr);
+  explicit PageManager(QObject* parent = nullptr);
 
   [[nodiscard]] bool thereIsPreviousPage() const;
 
@@ -34,7 +34,7 @@ class PageManager : public QObject {
   /// \brief возврат на главную страницу
   // Q_INVOKABLE void goMain();
 
-  [[nodiscard]] PageContextModel *currentPageContextModel() const;
+  [[nodiscard]] PageContextModel* currentPageContextModel() const;
   [[nodiscard]] std::optional<PageClosingContext> lastPageClosingContext()
       const;
 
@@ -43,12 +43,12 @@ class PageManager : public QObject {
   void lastPageClosed();
 
  private:
-  void push(PageContextModel *pageContextModel);
+  void push(PageContextModel* pageContextModel);
   void resetPageClosingContext(
       std::optional<PageClosingContext> = std::nullopt);
 
   /// \memberof стэк страниц
-  QList<PageContextModel *> _pagesStack;
+  QList<PageContextModel*> _pagesStack;
   /// \memberof контекст закрытия последней страницы
   std::optional<PageClosingContext> _pageClosingContext;
 };

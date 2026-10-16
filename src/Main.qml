@@ -1,7 +1,6 @@
 import QtQuick
-import QtQuick.Effects
+import QtQuick.Controls
 import modules.configuration
-import modules.notify_manager
 import modules.page_manager
 import modules.core
 
@@ -17,73 +16,40 @@ Window {
     color: "transparent"
 
     property bool closeWindow: false
+    property Core core: Core {
+        Component.onCompleted: {
+            setPageManager(PageManager);
+        }
+    }
 
     Component.onCompleted: {
         root.flags = Configuration.windowFlags;
     }
+
     Binding {
         target: Configuration
         property: "displaySize"
-        value: Qt.size(width, height)
+        value: Qt.size(root.width, root.height)
     }
 
-    Core {
-        id: core
+    BackgroundImage {
         anchors.fill: parent
-
-        Component.onCompleted: {
-            setPageManager(PageManager);
-        }
-
-        Image {
-            id: backgroundImage
-            anchors.fill: parent
-            source: "file:" + Configuration.windowBackground()
-
-            visible: !(root.flags & Qt.FramelessWindowHint)
-        }
-
-        Rectangle {
-            id: backgroundImageMaskRectangle
-            anchors.fill: backgroundImage
-            radius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) //
-            ? Configuration.r5RadiusStatic //
-            : 0
-            color: "black"
-            visible: false
-            layer.enabled: root.flags & Qt.FramelessWindowHint
-        }
-
-        MultiEffect {
-            anchors.fill: backgroundImage
-            source: backgroundImage
-            maskEnabled: !!(Configuration.windowFlags & Qt.FramelessWindowHint)
-            maskSource: backgroundImageMaskRectangle
-        }
-
-        Item {
-            id: contentItem
-            anchors.fill: parent
-
-            Loader {
-                id: contentLoader
-                anchors.fill: parent
-                source: PageManager.currentPageContextModel ? PageManager.currentPageContextModel.pageSource : ""
-            }
-        }
     }
 
-    NotifyManager {
+    Loader {
+        id: contentLoader
         anchors.fill: parent
-        anchors.topMargin: 20
-        anchors.leftMargin: 20
+        source: PageManager.currentPageContextModel //
+        ? PageManager.currentPageContextModel.pageSource : ""
     }
 
-    Connections {
-        target: PageManager
+    Label {
+        id: version
 
-        function onLastPageClosed() {
-            root.close();
-        }
+        anchors.bottom: parent.bottom
+        anchors.right: parent.right
+        anchors.margins: 20
+        color: Configuration.theme.semiTransparentWhiteColor
+        text: Configuration.applicationVersion
     }
 }
