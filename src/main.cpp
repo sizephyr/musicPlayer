@@ -1,22 +1,17 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
-
 #ifdef SHOW_RESOURCES
 #include <QDirIterator>
 #endif
+
+#include "logger.h"
 #include "windowhelper.h"
 
 int main(int argc, char* argv[]) {
-  qSetMessagePattern(
-      "[%{time yyMMdd h:mm:ss.zzz} "
-      "%{category} "
-      "%{if-debug}DEBG%{endif}"
-      "%{if-info}INFO%{endif}"
-      "%{if-warning}WARN%{endif}"
-      "%{if-critical}CRIT%{endif}"
-      "%{if-fatal}FATL%{endif}] "
-      "- %{message}");
   QGuiApplication app(argc, argv);
+  QGuiApplication::setOrganizationName("com.sizephyr.soft");
+  QGuiApplication::setApplicationName("music_player");
+  Logger::i();  // иницилизация логгера
 
   QQmlApplicationEngine engine;
   QObject::connect(

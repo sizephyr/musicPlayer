@@ -6,3 +6,4 @@ constinit const auto PROJECT_VERSION_PATCH = @PROJECT_VERSION_PATCH@;
 constinit const auto FULL_PROJECT_VERSION = "@PROJECT_VERSION@";
 constinit const auto GIT_COMMIT_HASH = "@GIT_COMMIT_HASH@";
 constinit const auto BUILD_TYPE = "@BUILD_TYPE@";
+constinit const auto RELEASE_CHANNEL = "@RELEASE_CHANNEL@";

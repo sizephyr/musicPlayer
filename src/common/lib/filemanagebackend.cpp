@@ -230,10 +230,23 @@ FileManageBackend::fillCoverImagePathByFfmpegCLI(
     std::filesystem::path targetImagePath) {
   QProcess process;
 
-  // Настраиваем исполняемый файл и аргументы команды
-  process.setProgram(QStringLiteral("ffmpeg"));
+  QString ffmpegPath = QStandardPaths::findExecutable(QStringLiteral("ffmpeg"));
+
+#ifdef Q_OS_MAC  // ищем ффмпег, установленый через брю
+  if (ffmpegPath.isEmpty()) {
+    ffmpegPath = QStandardPaths::findExecutable(
+        QStringLiteral("ffmpeg"), {QStringLiteral("/opt/homebrew/bin"),
+                                   QStringLiteral("/usr/local/bin")});
+  }
+#endif
+
+  if (ffmpegPath.isEmpty()) {
+    co_return std::unexpected("Исполняемый файл ffmpeg не найден в системе!");
+  }
+
+  process.setProgram(ffmpegPath);
   process.setArguments({
-      QStringLiteral("-y"),  // Принудительная перезапись без вопросов!
+      QStringLiteral("-y"),
       QStringLiteral("-i"),
       descr->path().c_str(),
       QStringLiteral("-map"),
@@ -253,7 +266,6 @@ FileManageBackend::fillCoverImagePathByFfmpegCLI(
 
   co_await qCoro(process).waitForFinished();
 
-  // Проверяем результаты выполнения
   if (process.exitStatus() == QProcess::NormalExit && process.exitCode() != 0) {
     co_return std::unexpected("Ошибка выполнения ffmpeg: " +
                               process.readAllStandardError());

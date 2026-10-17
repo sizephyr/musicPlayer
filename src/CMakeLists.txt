@@ -18,11 +18,14 @@ qt_add_qml_module(
   SOURCES
   windowhelper.h
   windowhelper.cpp
+  logger.h
+  logger.cpp
   RESOURCES
   ../img/base_background.jpg)
 
-target_link_libraries(main PRIVATE Qt6::Quick themesplugin configurationplugin
-                                   settings_pageplugin)
+target_link_libraries(main PRIVATE Qt6::Quick common_lib themesplugin
+                                   configurationplugin settings_pageplugin)
+target_include_directories(main PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(
   TARGETS mainplugin

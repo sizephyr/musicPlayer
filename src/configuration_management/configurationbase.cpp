@@ -270,10 +270,11 @@ QString Base::applicationVersion() const {
   // константа NONE определена в cmake/define_version_h.cmake как признак сборки
   // не из репо
   if (QString::compare(GIT_COMMIT_HASH, "NONE") != 0) {
-    return QStringLiteral("%1.%2 - %3")
-        .arg(FULL_PROJECT_VERSION, BUILD_TYPE, GIT_COMMIT_HASH);
+    return QStringLiteral("%1.%2.%3 - %4")
+        .arg(FULL_PROJECT_VERSION, RELEASE_CHANNEL, BUILD_TYPE,
+             GIT_COMMIT_HASH);
   } else {
-    return QStringLiteral("%1 - %2").arg(FULL_PROJECT_VERSION, BUILD_TYPE);
+    return QStringLiteral("%1.%2").arg(FULL_PROJECT_VERSION, RELEASE_CHANNEL);
   }
 }
 

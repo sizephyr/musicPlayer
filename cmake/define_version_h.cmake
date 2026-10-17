@@ -11,6 +11,7 @@ if(NOT GIT_COMMIT_HASH)
 endif()
 
 set(BUILD_TYPE ${CMAKE_BUILD_TYPE})
+set(RELEASE_CHANNEL "alpha.closed") # закрытая альфа. Других пока что нет)
 
 configure_file("${CMAKE_SOURCE_DIR}/cmake/res/version.h.in"
                "${CMAKE_BINARY_DIR}/version.h")

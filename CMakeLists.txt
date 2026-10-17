@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.16)
 
 project(
   musicPlayer
-  VERSION 0.1.3
+  VERSION 0.1.4
   LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -41,8 +41,8 @@ if(SHOW_RESOURCES)
 endif()
 
 target_link_libraries(
-  musicPlayer PRIVATE Qt6::Quick mainplugin coreplugin page_managerplugin
-                      notify_managerplugin)
+  musicPlayer PRIVATE Qt6::Quick mainplugin common_lib coreplugin
+                      page_managerplugin notify_managerplugin)
 
 set_target_properties(
   musicPlayer
