@@ -10,6 +10,8 @@ if(NOT GIT_COMMIT_HASH)
   set(GIT_COMMIT_HASH "NONE")
 endif()
 
+message(STATUS "GIT_COMMIT_HASH - ${GIT_COMMIT_HASH}")
+
 set(BUILD_TYPE ${CMAKE_BUILD_TYPE})
 set(RELEASE_CHANNEL "alpha.closed") # закрытая альфа. Других пока что нет)
 

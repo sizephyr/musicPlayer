@@ -20,7 +20,7 @@ if(NOT QCoro6_FOUND)
       OFF
       CACHE BOOL "Disable QCoro QtDBus support" FORCE)
   set(QCORO_WITH_QTNETWORK
-      ON
+      OFF # подключить, когда будет использоваться
       CACHE BOOL "Enable QCoro QtNetwork support" FORCE)
   set(QCORO_WITH_QTSQL
       OFF
@@ -53,11 +53,12 @@ if(NOT QCoro6_FOUND)
       target_compile_options(${_qcoro_target} PRIVATE -Wno-error)
     endif()
   endforeach()
+endif()
 
-  if(APPLE)
-    install(
-      TARGETS QCoro6Core QCoro6Network
-      ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
-      LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)
-  endif()
+if(APPLE)
+  install(
+    TARGETS QCoro6Core # QCoro6Network подключить, когда будет использоваться
+    BUNDLE DESTINATION .
+    ARCHIVE DESTINATION musicPlayer.app/Contents/Frameworks
+    LIBRARY DESTINATION musicPlayer.app/Contents/Frameworks)
 endif()

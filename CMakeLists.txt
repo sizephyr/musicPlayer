@@ -13,6 +13,17 @@ set(QML_IMPORT_PATH
     "${CMAKE_BINARY_DIR}/src/qml"
     CACHE PATH "Path to application qml modules" FORCE)
 
+if(CMAKE_BUILD_TYPE MATCHES "Release")
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+
+  add_compile_definitions(
+    QT_NO_DEBUG QT_NO_DEPRECATED_WARNINGS QT_DISABLE_DEPRECATED_BEFORE=0x060B00
+    QT_USE_QSTRINGBUILDER)
+  set(CPACK_COMPONENTS_ALL Unspecified)
+endif()
+
 include(FetchContent)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
