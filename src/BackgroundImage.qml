@@ -8,7 +8,7 @@ Item {
     Image {
         id: backgroundImage
         anchors.fill: parent
-        source: "file:" + Configuration.windowBackground()
+        source: "file:" + Configuration.windowBackground
 
         visible: !(Configuration.windowFlags & Qt.FramelessWindowHint)
     }

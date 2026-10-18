@@ -1,19 +1,19 @@
 import QtQuick
 import modules.common
-import modules.main_page
+import modules.configuration
 
 BaseSlider {
     id: root
 
     orientation: BaseSlider.Orientation.BottomToTop
 
-    value: SomeMediaPlayer.audioOutput.volume
+    value: Configuration.volumeRatio
 
     Connections {
         target: root
         function onValueChanged() {
-            if (SomeMediaPlayer.audioOutput.volume !== root.value) {
-                SomeMediaPlayer.audioOutput.volume = root.value;
+            if (Configuration.volumeRatio !== root.value) {
+                Configuration.volumeRatio = root.value;
             }
         }
     }

@@ -3,6 +3,8 @@
 #include <utils/utils.h>
 
 #include <QDir>
+#include <QGuiApplication>
+#include <QJsonObject>
 #include <QLoggingCategory>
 #include <QStandardPaths>
 #include <chrono>
@@ -13,20 +15,24 @@
 namespace {
 const auto loggingCategory = QLoggingCategory("configuration.base");
 
-constinit const auto defaultAnimationDuration = std::chrono::milliseconds(250);
-constinit const auto defaultNotificationHideAfterMs =
-    std::chrono::milliseconds(4000);
+namespace DefaultValues {
+constinit const auto animationDuration = std::chrono::milliseconds(250);
+constinit const auto notificationHideAfterMs = std::chrono::milliseconds(4000);
 constinit const auto referenceDisplaySize = QSize(1000, 600);
+constinit const auto backgroundTransparentnesRatio = 0.6;
+constinit const auto volumeRatio = 0.25;
+}  // namespace DefaultValues
 
 constinit const auto applicationConfigFilename = "ApplicationConfig.json";
 constinit const auto networkConfigFilename = "NetworkConfig.json";
 constinit const auto unitConfigFilename = "UnitConfig.json";
-constinit const auto windowNode = "window";
 
 namespace Keys {
+constinit const auto coreNode = "core";
 constinit const auto windowNode = "window";
 constinit const auto animationNode = "animaltion";
 constinit const auto networkNode = "network";
+constinit const auto themeNode = "theme";
 constinit const auto width = "width";
 constinit const auto height = "height";
 constinit const auto title = "title";
@@ -34,19 +40,65 @@ constinit const auto background = "background";
 constinit const auto durationMs = "duration_ms";
 constinit const auto notificationHideAfterMs = "notification_hide_after_ms";
 constinit const auto baseTransferTimeoutMs = "base_transfer_timeout_ms";
+constinit const auto backgroundTransparentnesRatio =
+    "background_transparentnes_ratio";
+constinit const auto configLoaded = "config_loaded";
+constinit const auto volumeRatio = "volume_ratio";
 }  // namespace Keys
 
-auto appConfigLocation() {
-  QString configDirStr =
-      QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-
-  return QDir(configDirStr).filePath(applicationConfigFilename);
+void jsonToMap(const QJsonObject& obj, QSettings::SettingsMap& map,
+               const QString& prefix = {}) {
+  for (auto it = obj.begin(); it != obj.end(); ++it) {
+    const QString key = prefix.isEmpty() ? it.key() : prefix + u'/' + it.key();
+    if (it.value().isObject()) {
+      jsonToMap(it.value().toObject(), map, key);
+    } else {
+      map.insert(key, it.value().toVariant());
+    }
+  }
 }
+
+void mapToJson(QJsonObject& obj, QStringView key, const QVariant& value) {
+  const int slashIdx = key.indexOf(u'/');
+  if (slashIdx == -1) {
+    obj.insert(key.toString(), QJsonValue::fromVariant(value));
+    return;
+  }
+
+  const QString topKey = key.left(slashIdx).toString();
+  const QStringView subKey = key.mid(slashIdx + 1);
+
+  QJsonObject subObj = obj.value(topKey).toObject();
+  mapToJson(subObj, subKey, value);
+  obj.insert(topKey, subObj);
+}
+
 }  // namespace
 
 namespace Configuration {
 
-Base::Base(QObject* parent) : QObject(parent) { load(); }
+Base::Base(QObject* parent)
+    : QObject(parent),
+      _format(QSettings::registerFormat("json", &Private::QSettingsHelper::read,
+                                        &Private::QSettingsHelper::write)),
+      _settings(new QSettings(_format, QSettings::UserScope,
+                              QGuiApplication::organizationName(),
+                              QGuiApplication::applicationName(), this)) {
+  qCInfo(loggingCategory).noquote()
+      << "Конфигурация будет загружена из фала" << _settings->fileName();
+
+  if (!readFromContext(Keys::coreNode, Keys::configLoaded, false).toBool()) {
+    if (auto loadingResult =
+            loadDefaultConfig(_settings->fileName().toStdString());
+        !loadingResult) {
+      throw std::runtime_error(
+          QStringLiteral("Не удалось загрузить конфигурацию по-умлочанию: %1")
+              .arg(loadingResult.error())
+              .toStdString());
+    }
+    qCInfo(loggingCategory) << "Загружена конфигурация по-умолчанию";
+  }
+}
 
 void Base::setDisplaySize(QSize size) {
   _displaySize = size;
@@ -54,189 +106,102 @@ void Base::setDisplaySize(QSize size) {
   emit displaySizeChanged();
 }
 
-void Base::load() {
-  auto configPathExp = getApplicationConfigPath();
-
-  // Если пути нет, создаем конфигурацию по умолчанию
-  if (!configPathExp.has_value()) {
-    if (auto configCreatingResult = makeDefaultApplicationConfig();
-        !configCreatingResult) {
-      throw std::runtime_error(
-          "Не удалось создать конфигурацию приложения по умолчанию: " +
-          configCreatingResult.error().toStdString());
-    }
-
-    // Пытаемся получить путь повторно после успешного создания файла
-    configPathExp = getApplicationConfigPath();
-    if (!configPathExp.has_value()) {
-      throw std::runtime_error(
-          "Критическая ошибка: Путь к конфигурации недоступен после попытки её "
-          "создания.");
-    }
-  }
-
-  const auto configPath = configPathExp.value();
-
-  std::error_code ec;
-  const auto canonicalPath = std::filesystem::canonical(configPath, ec);
-  qCInfo(loggingCategory) << "Загрузка конфигурации из файла " << canonicalPath;
-
-  if (ec) {
-    throw std::runtime_error(
-        "Файл конфигурации не найден или недоступен по пути '" +
-        configPath.string() + "'. Системная ошибка: " + ec.message());
-  }
-
-  auto rawConfigExp = Utils::JSON::readJsonFile(canonicalPath);
-  if (!rawConfigExp) {
-    throw std::runtime_error(QString("Невалидная конфигурация приложения: %1")
-                                 .arg(rawConfigExp.error())
-                                 .toStdString());
-  }
-
-  _rawApplicationConfig = rawConfigExp.value();
-  qDebug() << "Конфигурация успешно загружена:" << _rawApplicationConfig;
-}
-
-std::expected<std::filesystem::path, QString> Base::getApplicationConfigPath() {
-  if (!QFile::exists(appConfigLocation())) {
-    return std::unexpected("Файл конфигурации приложения не найден по пути:" +
-                           appConfigLocation());
-  }
-
-  return std::filesystem::path(appConfigLocation().toStdString());
-}
-
-std::expected<std::filesystem::path, QString> Base::getNetworkConfigPath() {
-  QString configDirStr =
-      QStandardPaths::writableLocation(QStandardPaths::AppConfigLocation);
-
-  QString configFilePath = QDir(configDirStr).filePath(networkConfigFilename);
-
-  if (!QFile::exists(configFilePath)) {
-    return std::unexpected("Файл конфигурации подключения не найден по пути:" +
-                           configFilePath);
-  }
-
-  return std::filesystem::path(configFilePath.toStdString());
-}
-
-std::expected<void, QString> Base::makeDefaultApplicationConfig() {
-  if (auto configObjExp = Utils::JSON::parseQJsonObject(Private::defaultConfig);
-      !configObjExp) {
-    return std::unexpected("Не удалось скомпоновать дефолтный конфиг: " +
-                           configObjExp.error().errorString());
-  } else if (auto writeResult = Utils::JSON::writeJsonToFile(  // NOLINT
-                 configObjExp.value(),
-                 std::filesystem::path(appConfigLocation().toStdString()));
-             !writeResult) {
-    return std::unexpected(writeResult.error());
-  } else {  // NOLINT
-    return {};
+std::expected<void, QString> Base::loadDefaultConfig(
+    const std::filesystem::path& configPath) {
+  if (auto defaultConfigExp =
+          Utils::JSON::parseQJsonObject(Configuration::Private::defaultConfig);
+      !defaultConfigExp) {
+    return std::unexpected(defaultConfigExp.error().errorString());
+  } else {
+    return Utils::JSON::writeJsonToFile(defaultConfigExp.value(), configPath);
   }
 }
 
-std::optional<QJsonObject> Base::windowObject() const {
-  if (_rawApplicationConfig.contains(Keys::windowNode) &&
-      _rawApplicationConfig.value(Keys::windowNode).isObject()) {
-    return _rawApplicationConfig.value(Keys::windowNode).toObject();
+bool Private::QSettingsHelper::read(QIODevice& device,
+                                    QSettings::SettingsMap& map) {
+  const auto data = device.readAll();
+  QJsonParseError error;
+  const auto doc = QJsonDocument::fromJson(data, &error);
+  if (error.error != QJsonParseError::NoError || !doc.isObject()) {
+    return false;
   }
 
-  return std::nullopt;
+  jsonToMap(doc.object(), map);
+  return true;
 }
 
-std::optional<QJsonObject> Base::animationObject() const {
-  if (_rawApplicationConfig.contains(Keys::animationNode) &&
-      _rawApplicationConfig.value(Keys::animationNode).isObject()) {
-    return _rawApplicationConfig.value(Keys::animationNode).toObject();
+bool Private::QSettingsHelper::write(QIODevice& device,
+                                     const QSettings::SettingsMap& map) {
+  QJsonObject root;
+  for (auto it = map.begin(); it != map.end(); ++it) {
+    mapToJson(root, it.key(), it.value());
   }
 
-  return std::nullopt;
+  const QJsonDocument doc(root);
+  return device.write(doc.toJson(QJsonDocument::Indented)) != -1;
 }
 
-std::optional<QJsonObject> Base::networkObject() const {
-  if (_rawApplicationConfig.contains(Keys::networkNode) &&
-      _rawApplicationConfig.value(Keys::networkNode).isObject()) {
-    return _rawApplicationConfig.value(Keys::networkNode).toObject();
-  }
+void Base::writeInContext(const QString& context, const QString& key,
+                          const QVariant& value) {
+  const auto cleanup = setContextGroup(context);
+  _settings->setValue(key, value);
+}
 
-  return std::nullopt;
+QVariant Base::readFromContext(const QString& context, const QString& key,
+                               const QVariant& defaultValue) const {
+  const auto cleanup = setContextGroup(context);
+  return _settings->value(key, defaultValue);
 }
 
 int Base::referenceWindowWidth() const {
-  if (auto windowObjectOpt = windowObject();
-      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::width) &&
-      windowObjectOpt->value(Keys::width).isDouble()) {
-    return windowObjectOpt->value(Keys::width).toInt();
-  }
-
-  return {};  // этот метод вызывается в QML, поэтому не std::optional
+  return readFromContext(Keys::windowNode, Keys::width,
+                         DefaultValues::referenceDisplaySize.width())
+      .toInt();
 }
 
 int Base::referenceWindowHeight() const {
-  if (auto windowObjectOpt = windowObject();
-      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::height) &&
-      windowObjectOpt->value(Keys::height).isDouble()) {
-    return windowObjectOpt->value(Keys::height).toInt();
-  }
-
-  return {};  // этот метод вызывается в QML, поэтому не std::optional
-}
-
-QString Base::windowTitle() const {
-  if (auto windowObjectOpt = windowObject();
-      windowObjectOpt.has_value() && windowObjectOpt->contains(Keys::title) &&
-      windowObjectOpt->value(Keys::title).isString()) {
-    return windowObjectOpt->value(Keys::title).toString();
-  }
-
-  return {};  // этот метод вызывается в QML, поэтому не std::optional
+  return readFromContext(Keys::windowNode, Keys::height,
+                         DefaultValues::referenceDisplaySize.height())
+      .toInt();
 }
 
 int Base::animationDurationMs() const {
-  if (auto animationObjectOpt = animationObject();
-      animationObjectOpt.has_value() &&
-      animationObjectOpt->contains(Keys::durationMs) &&
-      animationObjectOpt->value(Keys::durationMs).isDouble()) {
-    return animationObjectOpt->value(Keys::durationMs).toInt();
-  }
-
-  return defaultAnimationDuration
-      .count();  // этот метод вызывается в QML, поэтому не std::optional
-}
-
-int Base::baseTransferTimeoutMs() const {
-  if (auto networkObjectOpt = networkObject();
-      networkObjectOpt.has_value() &&
-      networkObjectOpt->contains(Keys::baseTransferTimeoutMs) &&
-      networkObjectOpt->value(Keys::baseTransferTimeoutMs).isDouble()) {
-    return networkObjectOpt->value(Keys::baseTransferTimeoutMs).toInt();
-  }
-
-  return {};  // этот метод вызывается в QML, поэтому не std::optional
+  return readFromContext(Keys::animationNode, Keys::durationMs,
+                         DefaultValues::animationDuration.count())
+      .toInt();
 }
 
 int Base::notificationHideAfterMs() const {
-  if (auto animationObjectOpt = animationObject();
-      animationObjectOpt.has_value() &&
-      animationObjectOpt->contains(Keys::durationMs) &&
-      animationObjectOpt->value(Keys::durationMs).isDouble()) {
-    return animationObjectOpt->value(Keys::notificationHideAfterMs).toInt();
+  return readFromContext(Keys::animationNode, Keys::notificationHideAfterMs,
+                         DefaultValues::notificationHideAfterMs.count())
+      .toInt();
+}
+
+double Base::backgroundTransparentnesRatio() const {
+  return readFromContext(Keys::themeNode, Keys::backgroundTransparentnesRatio,
+                         DefaultValues::backgroundTransparentnesRatio)
+      .toDouble();
+}
+
+void Base::setBackgroundTransparentnesRatio(
+    double newBackgroundTransparentnesRatio) {
+  const auto truncateToHundredths = [](double value) {
+    return std::trunc(value * 100.0) / 100.0;
+  };
+
+  if (qFuzzyCompare(backgroundTransparentnesRatio(),
+                    truncateToHundredths(newBackgroundTransparentnesRatio))) {
+    return;
   }
 
-  return defaultNotificationHideAfterMs
-      .count();  // этот метод вызывается в QML, поэтому не std::optional
+  writeInContext(Keys::themeNode, Keys::backgroundTransparentnesRatio,
+                 truncateToHundredths(newBackgroundTransparentnesRatio));
+
+  emit backgroundTransparentnesRatioChanged();
 }
 
 QString Base::windowBackground() const {
-  if (auto windowObjectOpt = windowObject();
-      windowObjectOpt.has_value() &&
-      windowObjectOpt->contains(Keys::background) &&
-      windowObjectOpt->value(Keys::background).isString()) {
-    return windowObjectOpt->value(Keys::background).toString();
-  }
-
-  return {};  // этот метод вызывается в QML, поэтому не std::optional
+  return readFromContext(Keys::windowNode, Keys::background, "").toString();
 }
 
 double Base::scaleFactor() const {
@@ -249,7 +214,7 @@ double Base::scaleFactor() const {
     return 1.0;
   }
 
-  return average(displaySize()) / average(referenceDisplaySize);
+  return average(displaySize()) / average(DefaultValues::referenceDisplaySize);
 }
 
 Qt::WindowFlags Base::windowFlags() {
@@ -276,6 +241,38 @@ QString Base::applicationVersion() const {
   } else {
     return QStringLiteral("%1.%2").arg(FULL_PROJECT_VERSION, RELEASE_CHANNEL);
   }
+}
+
+double Base::volumeRatio() const {
+  return readFromContext(Keys::coreNode, Keys::volumeRatio,
+                         DefaultValues::volumeRatio)
+      .toDouble();
+}
+
+void Base::setVolumeRatio(double newVolumeRatio) {
+  const auto truncateToHundredths = [](double value) {
+    return std::trunc(value * 100.0) / 100.0;
+  };
+
+  if (qFuzzyCompare(volumeRatio(), truncateToHundredths(newVolumeRatio))) {
+    return;
+  }
+
+  writeInContext(Keys::coreNode, Keys::volumeRatio,
+                 truncateToHundredths(newVolumeRatio));
+
+  emit volumeRatioChanged();
+}
+
+void Base::setWindowBackground(const QString& newWindowBackground) {
+  auto filename = QUrl(newWindowBackground).toLocalFile();
+  if (windowBackground() == filename) {
+    return;
+  }
+
+  writeInContext(Keys::windowNode, Keys::background, filename);
+
+  emit windowBackgroundChanged();
 }
 
 }  // namespace Configuration

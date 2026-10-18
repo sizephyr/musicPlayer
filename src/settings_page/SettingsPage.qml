@@ -1,8 +1,8 @@
+import QtCore
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls.Basic
 import modules.configuration
-import modules.common
 
 // NOTE: пока что просто имитируем наличие модель-вью: особо нечего конфигурировать
 Popup {
@@ -58,44 +58,26 @@ Popup {
             ColumnLayout {
                 anchors.fill: parent
 
-                Item {
+                SettingsSlider {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 50
-                    RowLayout {
-                        anchors.fill: parent
+                    text: "Прозрачность фона"
 
-                        Label {
-                            Layout.preferredHeight: 40
-                            verticalAlignment: Text.AlignVCenter
-                            horizontalAlignment: Text.AlignHCenter
-                            background: Rectangle{
-                                color:"transparent"
-                            }
-
-                            text: "Прозрачность фона"
-                        }
-                        BaseSlider{
-                            id: slider
-                            Layout.fillWidth: true
-                            Layout.preferredWidth: 40
-                            Layout.preferredHeight: 30
-                            Layout.margins: 25
-                            Layout.leftMargin: 10
-                            Layout.rightMargin: 10
-                            radius: Configuration.r5RadiusStatic
-                            orientation: BaseSlider.Orientation.LeftToRight
-
-                            value: Configuration.theme.backgroundTransparentnesRatio
-                            Connections {
-                                target: slider
-                                function onValueChanged() {
-                                    if (Configuration.theme.backgroundTransparentnesRatio !== slider.value) {
-                                        Configuration.theme.backgroundTransparentnesRatio = slider.value;
-                                    }
-                                }
-                            }
+                    value: Configuration.backgroundTransparentnesRatio
+                    onValueChanged: {
+                        if (Configuration.backgroundTransparentnesRatio !== value) {
+                            Configuration.backgroundTransparentnesRatio = value;
                         }
                     }
+                }
+                SettingsFileSellector {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 50
+                    text: "Фоновая картинка"
+
+                    currentFolder: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
+                    defaultSuffix: "png"
+                    onAccepted: Configuration.windowBackground = selectedFile
                 }
                 Item {
                     Layout.fillWidth: true

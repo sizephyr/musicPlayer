@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QJsonObject>
-#include <QObject>
 #include <QQmlEngine>
+#include <QSettings>
 #include <QSize>
 #include <expected>
 #include <filesystem>
@@ -15,47 +14,85 @@ class Base : public QObject {
 
   Q_PROPERTY(QSize displaySize READ displaySize WRITE setDisplaySize NOTIFY
                  displaySizeChanged)
-  Q_PROPERTY(double scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
-  Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
   Q_PROPERTY(QString applicationVersion READ applicationVersion CONSTANT)
+  Q_PROPERTY(double scaleFactor READ scaleFactor NOTIFY scaleFactorChanged)
+  Q_PROPERTY(int referenceWindowWidth READ referenceWindowWidth CONSTANT)
+  Q_PROPERTY(int referenceWindowHeight READ referenceWindowHeight CONSTANT)
+  Q_PROPERTY(int animationDurationMs READ animationDurationMs CONSTANT)
+  Q_PROPERTY(int notificationHideAfterMs READ notificationHideAfterMs CONSTANT)
+  Q_PROPERTY(QString windowBackground READ windowBackground WRITE
+                 setWindowBackground NOTIFY windowBackgroundChanged)
+  Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
+  Q_PROPERTY(
+      double backgroundTransparentnesRatio READ backgroundTransparentnesRatio
+          WRITE setBackgroundTransparentnesRatio NOTIFY
+              backgroundTransparentnesRatioChanged)
+  Q_PROPERTY(double volumeRatio READ volumeRatio WRITE setVolumeRatio NOTIFY
+                 volumeRatioChanged)
+
  public:
   explicit Base(QObject* parent = nullptr);
 
-  [[nodiscard]] Q_INVOKABLE int referenceWindowWidth() const;
-  [[nodiscard]] Q_INVOKABLE int referenceWindowHeight() const;
-  [[nodiscard]] Q_INVOKABLE QString windowTitle() const;
-  [[nodiscard]] Q_INVOKABLE int animationDurationMs() const;
-  [[nodiscard]] Q_INVOKABLE int baseTransferTimeoutMs() const;
-  [[nodiscard]] Q_INVOKABLE int notificationHideAfterMs() const;
-  [[nodiscard]] Q_INVOKABLE QString windowBackground() const;
-
-  void setDisplaySize(QSize);
+  [[nodiscard]] QString applicationVersion() const;
+  [[nodiscard]] int referenceWindowWidth() const;
+  [[nodiscard]] int referenceWindowHeight() const;
+  [[nodiscard]] int animationDurationMs() const;
+  [[nodiscard]] int notificationHideAfterMs() const;
+  [[nodiscard]] QString windowBackground() const;
   [[nodiscard]] QSize displaySize() const;
   [[nodiscard]] double scaleFactor() const;
   [[nodiscard]] static Qt::WindowFlags windowFlags();
+  [[nodiscard]] double backgroundTransparentnesRatio() const;
+  [[nodiscard]] double volumeRatio() const;
 
-  QString applicationVersion() const;
+  void setDisplaySize(QSize);
+  void setBackgroundTransparentnesRatio(
+      double newBackgroundTransparentnesRatio);
+  void setVolumeRatio(double newVolumeRatio);
+  void setWindowBackground(const QString& newWindowBackground);
 
  signals:
   void connectionConfiguredChanged();
   void scaleFactorChanged();
   void displaySizeChanged();
+  void backgroundTransparentnesRatioChanged();
+  void volumeRatioChanged();
+  void windowBackgroundChanged();
 
  private:
-  void load();
-  [[nodiscard]] static std::expected<std::filesystem::path, QString>
-  getApplicationConfigPath();
-  [[nodiscard]] static std::expected<std::filesystem::path, QString>
-  getNetworkConfigPath();
+  [[nodiscard]] static std::expected<void, QString> loadDefaultConfig(
+      const std::filesystem::path&);
+
   [[nodiscard]] static std::expected<void, QString>
   makeDefaultApplicationConfig();
 
-  [[nodiscard]] std::optional<QJsonObject> windowObject() const;
-  [[nodiscard]] std::optional<QJsonObject> animationObject() const;
-  [[nodiscard]] std::optional<QJsonObject> networkObject() const;
+  /// \brief лок контекстной групы, для того, чтобы не прописывать пути
+  /// полностью
+  [[nodiscard]] auto setContextGroup(const auto& groupName) const {
+    _settings->beginGroup(groupName);
+    return QScopeGuard([this] { _settings->endGroup(); });
+  }
+  void writeInContext(const QString& context, const QString& key,
+                      const QVariant& value);
+  [[nodiscard]] QVariant readFromContext(const QString& context,
+                                         const QString& key,
+                                         const QVariant& defaultValue) const;
 
   std::optional<QSize> _displaySize;
-  QJsonObject _rawApplicationConfig;
+  const QSettings::Format _format;
+  QSettings* _settings;
 };
+
+namespace Private {
+class QSettingsHelper {
+  friend class Configuration::Base;
+  [[nodiscard]] static bool read(QIODevice& device,
+                                 QSettings::SettingsMap& map);
+
+  [[nodiscard]] static bool write(QIODevice& device,
+                                  const QSettings::SettingsMap& map);
+};
+
+}  // namespace Private
 
 }  // namespace Configuration

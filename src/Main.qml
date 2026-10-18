@@ -9,8 +9,8 @@ Window {
     id: root
     width: Configuration.displaySize.width
     height: Configuration.displaySize.height
-    minimumWidth: Configuration.referenceWindowWidth()
-    minimumHeight: Configuration.referenceWindowHeight()
+    minimumWidth: Configuration.referenceWindowWidth
+    minimumHeight: Configuration.referenceWindowHeight
     flags: Configuration.windowFlags
 
     visible: true
@@ -47,8 +47,8 @@ Window {
     SettingsPage {
         id: settingsPage
 
-        width: Configuration.referenceWindowWidth() * 0.8
-        height: Configuration.referenceWindowHeight() * 0.8
+        width: Configuration.referenceWindowWidth * 0.8
+        height: Configuration.referenceWindowHeight * 0.8
         x: (parent.width - width) / 2
         y: (parent.height - height) / 2
     }

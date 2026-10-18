@@ -24,7 +24,7 @@ qt_add_qml_module(
   configurationbase.cpp
   defaultconfig.h)
 
-target_link_libraries(configuration PRIVATE themesplugin common_lib)
+target_link_libraries(configuration PRIVATE Qt6::Quick themesplugin common_lib)
 
 target_include_directories(configurationplugin
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

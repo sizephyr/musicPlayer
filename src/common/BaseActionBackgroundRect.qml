@@ -5,7 +5,7 @@ Rectangle {
     id: root
 
     color: Configuration.theme.extrapolateAlpha//
-    (Configuration.theme.grayColor, Configuration.theme.backgroundTransparentnesRatio)
+    (Configuration.theme.grayColor, Configuration.backgroundTransparentnesRatio)
 
     radius: !!(Configuration.windowFlags & Qt.FramelessWindowHint) ? Configuration.r5RadiusStatic : 0
 
@@ -23,7 +23,7 @@ Rectangle {
         id: appearanceAnimation
         target: translateTransform
         property: "y"
-        duration: Configuration.animationDurationMs()
+        duration: Configuration.animationDurationMs
         easing.type: Easing.OutCubic
 
         onStarted: {

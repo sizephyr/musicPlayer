@@ -13,7 +13,10 @@ qt_add_qml_module(
   STATIC
   QML_FILES
   SettingsPage.qml
-  SectionItem.qml)
+  SectionItem.qml
+  SettingsItem.qml
+  SettingsSlider.qml
+  SettingsFileSellector.qml)
 
 target_link_libraries(settings_page PRIVATE Qt6::Gui Qt6::Quick commonplugin
                                             common_lib configurationplugin)

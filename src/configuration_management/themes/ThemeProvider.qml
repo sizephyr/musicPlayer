@@ -32,8 +32,6 @@ QtObject {
     readonly property color semiTransparentMutedWhiteColor: extrapolateAlpha(mutedWhiteColor, 0.5)
     readonly property color semiTransparentLightGrayColor: extrapolateAlpha(lightGrayColor, 0.5)
 
-    property double backgroundTransparentnesRatio: 0.5
-
     function extrapolateAlpha(inputColor, transparencyFactor) {
         var factor = Math.max(0.0, Math.min(1.0, transparencyFactor));
 

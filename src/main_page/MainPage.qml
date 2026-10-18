@@ -15,8 +15,8 @@ BaseActionBackgroundRect {
 
     RowLayout {
         anchors.centerIn: parent
-        width: Configuration.referenceWindowWidth()
-        height: Configuration.referenceWindowHeight()
+        width: Configuration.referenceWindowWidth
+        height: Configuration.referenceWindowHeight
         spacing: 250
 
         PlayContext {
@@ -42,15 +42,6 @@ BaseActionBackgroundRect {
             }
         }
     }
-    // Rectangle {
-    //     id: controls
-    //     parent: playListItem.contentItem.parent
-
-    //     anchors.top: playListItem.contentItem.top
-    //     anchors.right: playListItem.contentItem.left
-    //     anchors.bottom: playListItem.contentItem.bottom
-    //     width: 40
-    // }
 
     ActiveDirectoryDialog {
         id: activeDirectoryDialog

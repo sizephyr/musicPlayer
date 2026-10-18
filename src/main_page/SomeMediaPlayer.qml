@@ -2,6 +2,7 @@ pragma Singleton
 
 import QtQuick
 import QtMultimedia
+import modules.configuration
 
 MediaPlayer {
     id: root
@@ -9,7 +10,7 @@ MediaPlayer {
     property double progressRatio: getProgressRatio(position)
 
     audioOutput: AudioOutput {
-        volume: 0.1
+        volume: Configuration.volumeRatio
     }
 
     onErrorOccurred: (error, errorString) => {
