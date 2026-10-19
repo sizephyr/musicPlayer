@@ -61,7 +61,7 @@ Window {
         width: 40
         height: 30
         text: "⚙"
-        font.pointSize: Configuration.primaryTextPointSizeStatic
+        font.pointSize: Configuration.regularTextPointSizeStatic
         palette.buttonText: Configuration.theme.lightGrayColor
 
         background: Rectangle {

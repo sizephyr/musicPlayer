@@ -36,9 +36,6 @@ QVariant PlayListModel::data(const QModelIndex& index, int role) const {
       return QVariant::fromValue(_container[index.row()]->title().value);
     case TrackArtist:
       return QVariant::fromValue(_container[index.row()]->artist().value);
-    // case CoverImagePath:
-    //   return QVariant::fromValue(
-    //       _container[index.row()]->coverImagePath().value_or("").c_str());
     default:
       return QVariant();
   }
@@ -50,7 +47,6 @@ QHash<int, QByteArray> PlayListModel::roleNames() const {
       {Path, RoleNames::path},
       {TrackTitle, RoleNames::trackTitle},
       {TrackArtist, RoleNames::trackArtist},
-      // {CoverImagePath, RoleNames::coverImagePath},
   };
 }
 

@@ -27,19 +27,25 @@ Item {
 
                 PlayContextCover {
                     id: cover
-                    source: root.model.coverSource
                     anchors.fill: parent
                     anchors.margins: 30
-
-                    // след/пред трек, плей/пауза
-                    PlayContextBasePlayingActions {
-                        anchors.fill: parent
-                        anchors.margins: parent.border.width
-                        radiusCorrecting: parent.border.width
-
-                        model: root.model
-                        canShow: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
+                    // т.к. для хранения обложки используется единственный файл,
+                    // вешаем временную метку, чтобы обновление происходило
+                    Connections {
+                        target: root.model
+                        function onCoverSourceChanged() {
+                            cover.source = root.model.coverSource + "?update=" + Date.now();
+                        }
                     }
+                }
+                // след/пред трек, плей/пауза
+                PlayContextBasePlayingActions {
+                    anchors.fill: parent
+                    anchors.margins: 30 + cover.border.width
+                    radiusCorrecting: cover.border.width
+
+                    model: root.model
+                    canShow: (root?.model?.contextCompletted && hoverHandler.hovered) ?? false
                 }
 
                 VolumeControl {

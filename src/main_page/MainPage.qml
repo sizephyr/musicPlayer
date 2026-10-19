@@ -11,7 +11,9 @@ BaseActionBackgroundRect {
         model.setPlayer(SomeMediaPlayer);
     }
 
-    property MainPageModel model: MainPageModel {}
+    property MainPageModel model: MainPageModel {
+        playContextModel.contextCompletted: playListItem.count !== 0
+    }
 
     RowLayout {
         anchors.centerIn: parent
@@ -34,20 +36,15 @@ BaseActionBackgroundRect {
 
             model: root.model
 
-            OpenCurrentFolderBtn {
-                id: openCurrentFolderBtn
-                anchors.fill: parent
-                onClicked: activeDirectoryDialog.show()
-                visible: root.model.currentPlayFolder === ""
-            }
+            onAppendFileCalled: activeDirectoryDialog.selectFile()
+            onAppendFolderCalled: activeDirectoryDialog.selectFolder()
         }
     }
 
     ActiveDirectoryDialog {
         id: activeDirectoryDialog
 
-        onCurrentPlayFolderChanged: folder => {
-            root.model.currentPlayFolder = folder;
-        }
+        onFolderSelected: folder => root.model.onFolderSelected(folder)
+        onFileSelected: file => root.model.onFileSelected(file)
     }
 }

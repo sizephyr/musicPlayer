@@ -27,38 +27,6 @@ Model::Model(QObject* parent)
           [this] { playPrevious(_playListModel->currentTrackUid()); });
 }
 
-QString Model::currentPlayFolder() const { return _currentPlayFolder; }
-
-void Model::setCurrentPlayFolder(const QString& newCurrentPlayFolder) {
-  if (_currentPlayFolder == newCurrentPlayFolder) {
-    return;
-  }
-  _currentPlayFolder = newCurrentPlayFolder;
-  onCurrentPlayFolderChanged();
-  if (!_playListModel->empty()) {
-    emit currentPlayFolderChanged();
-    _playContextModel->setContextCompletted(true);
-  } else {
-    _playContextModel->setContextCompletted(false);
-  }
-}
-
-void Model::onCurrentPlayFolderChanged() {
-  if (auto filesListExp = FileManageBackend::filesSearch(_currentPlayFolder)) {
-    for (const auto& filepath : filesListExp.value()) {
-      if (auto fileDescription = FileManageBackend::parseMp3(filepath)) {
-        _playListModel->pushBack(fileDescription);
-      } else {
-        qCWarning(loggingCategory)
-            << "Не удалось распарсить описание файла" << filepath.c_str();
-      }
-    }
-  } else {
-    qCWarning(loggingCategory)
-        << "Не удалось получить список файлов:" << filesListExp.error();
-  }
-}
-
 PlayListModel* Model::playListModel() const { return _playListModel; }
 
 PlayContextModel* Model::playContextModel() const { return _playContextModel; }
@@ -95,6 +63,15 @@ void Model::playPrevious(QUuid uid) {
   }
 }
 
+void Model::collectFile(const std::filesystem::path& filepath) {
+  if (auto fileDescription = FileManageBackend::parseMp3(filepath)) {
+    _playListModel->pushBack(fileDescription);
+  } else {
+    qCWarning(loggingCategory)
+        << "Не удалось распарсить описание файла" << filepath.c_str();
+  }
+}
+
 void Model::setPlayer(QMediaPlayer* newPlayer) {
   _player = newPlayer;
   connect(_player, &QMediaPlayer::mediaStatusChanged, this,
@@ -103,6 +80,32 @@ void Model::setPlayer(QMediaPlayer* newPlayer) {
               playNext(_playListModel->currentTrackUid());
             }
           });
+}
+
+void Model::onFolderSelected(const QString& newCurrentPlayFolder) {
+  if (auto filesListExp =
+          FileManageBackend::filesSearch(newCurrentPlayFolder)) {
+    for (const auto& filepath : filesListExp.value()) {
+      collectFile(filepath);
+    }
+  } else {
+    qCWarning(loggingCategory)
+        << "Не удалось получить список файлов:" << filesListExp.error();
+  }
+}
+
+void Model::onFileSelected(const QString& sellectedFilePath) {
+  // по сути, это нецелевое использование метода FileManageBackend::filesSearch,
+  // но пока что пусть
+  if (auto filesListExp = FileManageBackend::filesSearch(sellectedFilePath)) {
+    for (const auto& filepath : filesListExp.value()) {
+      collectFile(filepath);
+    }
+  } else {
+    qCWarning(loggingCategory)
+        << "Не удалось получить корректный путь до файла:"
+        << filesListExp.error();
+  }
 }
 
 }  // namespace MainPage

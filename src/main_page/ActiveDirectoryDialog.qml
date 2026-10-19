@@ -5,33 +5,66 @@ import QtQuick.Dialogs
 Item {
     id: root
 
-    signal currentPlayFolderChanged(url folder)
-    function show() {
-        activeDirectoryDialog.active = true;
+    signal folderSelected(url folder)
+    signal fileSelected(url file)
+
+    function selectFolder() {
+        directoryDialogLoader.active = true;
+    }
+    function selectFile() {
+        fileDialogLoader.active = true;
     }
 
-    onCurrentPlayFolderChanged: {
-        activeDirectoryDialog.active = false;
+    onFolderSelected: {
+        directoryDialogLoader.active = false;
+    }
+    onFileSelected: {
+        fileDialogLoader.active = false;
     }
 
     Loader {
-        id: activeDirectoryDialog
+        id: directoryDialogLoader
         active: false
 
         sourceComponent: Component {
             FolderDialog {
-                id: folderDialog
                 title: "Выберите папку с медиа"
                 currentFolder: StandardPaths.writableLocation(StandardPaths.HomeLocation)
 
                 onAccepted: {
-                    console.log("Выбранная папка (URL):", folderDialog.selectedFolder);
-                    root.currentPlayFolderChanged(selectedFolder);
+                    console.log("Выбранная папка (URL):", selectedFolder);
+                    root.folderSelected(selectedFolder);
                 }
 
                 onRejected: {
                     console.log("Выбор отменен");
-                    activeDirectoryDialog.active = false;
+                    directoryDialogLoader.active = false;
+                }
+
+                Component.onCompleted: {
+                    open();
+                }
+            }
+        }
+    }
+    Loader {
+        id: fileDialogLoader
+        active: false
+
+        sourceComponent: Component {
+            FileDialog {
+                title: "Выберите файл"
+                currentFolder: StandardPaths.writableLocation(StandardPaths.HomeLocation)
+                defaultSuffix: "mp3"
+
+                onAccepted: {
+                    console.log("Выбранный файл (URL):", selectedFile);
+                    root.fileSelected(selectedFile);
+                }
+
+                onRejected: {
+                    console.log("Выбор отменен");
+                    fileDialogLoader.active = false;
                 }
 
                 Component.onCompleted: {

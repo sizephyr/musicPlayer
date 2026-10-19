@@ -8,14 +8,21 @@ Item {
     // TODO: надо бы навести порядок. У плейлиста должна быть только модель плейлиста
     property MainPageModel model
     property Item contentItem: contentRect
+    property int count: view.count
     default property alias content: contentRect.data
+
+    signal appendFileCalled
+    signal appendFolderCalled
 
     Rectangle {
         anchors.centerIn: parent
         width: 500
         height: 500
-
         color: "transparent"
+
+        HoverHandler {
+            id: hoverHandler
+        }
 
         Rectangle {
             id: contentRect
@@ -25,7 +32,7 @@ Item {
             height: parent.height * 0.9
 
             border.width: 1
-            border.color: Configuration.theme.semiTransparentLightGrayColor
+            border.color: Configuration.theme.extrapolateAlpha(Configuration.theme.mutedWhiteColor, 0.3)
             color: Configuration.theme.semiTransparentLightGrayColor
             radius: Configuration.r3RadiusStatic
 
@@ -58,6 +65,23 @@ Item {
                     }
                 }
             }
+            OpenCurrentFolderBtn {
+                id: openCurrentFolderBtn
+                anchors.fill: parent
+                onClicked: root.appendFolderCalled()
+                visible: view.count === 0
+            }
+        }
+
+        PlayListActions {
+            id: actions
+            anchors.left: contentRect.right
+            anchors.verticalCenter: parent.verticalCenter
+            height: contentRect.height - contentRect.radius * 2
+            width: hoverHandler.hovered ? parent.width * 0.10 : 0
+
+            onAppendFileCalled: root.appendFileCalled()
+            onAppendFolderCalled: root.appendFolderCalled()
         }
 
         Connections {

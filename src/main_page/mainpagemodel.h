@@ -19,13 +19,9 @@ class Model : public QObject {
 
   Q_PROPERTY(PlayListModel* playListModel READ playListModel CONSTANT)
   Q_PROPERTY(PlayContextModel* playContextModel READ playContextModel CONSTANT)
-  Q_PROPERTY(QString currentPlayFolder READ currentPlayFolder WRITE
-                 setCurrentPlayFolder NOTIFY currentPlayFolderChanged)
+
  public:
   explicit Model(QObject* parent = nullptr);
-
-  [[nodiscard]] QString currentPlayFolder() const;
-  void setCurrentPlayFolder(const QString& newCurrentPlayFolder);
 
   [[nodiscard]] PlayListModel* playListModel() const;
   [[nodiscard]] PlayContextModel* playContextModel() const;
@@ -36,18 +32,18 @@ class Model : public QObject {
   Q_INVOKABLE void setPlayer(QMediaPlayer* newPlayer);
 
  signals:
-  void currentPlayFolderChanged();
   void coverProvided(const QString&);
   void played(QUuid);
 
- private slots:
-  void onCurrentPlayFolderChanged();
+ public slots:
+  void onFolderSelected(const QString& newCurrentPlayFolder);
+  void onFileSelected(const QString& sellectedFilePath);
 
  private:  // NOLINT
   void playNext(QUuid uid);
   void playPrevious(QUuid uid);
+  void collectFile(const std::filesystem::path&);
 
-  QString _currentPlayFolder;
   PlayListModel* _playListModel{nullptr};
   PlayContextModel* _playContextModel{nullptr};
   QMediaPlayer* _player{nullptr};

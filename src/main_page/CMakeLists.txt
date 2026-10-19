@@ -24,6 +24,13 @@ qt_add_qml_module(
   SomeMediaPlayer.qml
   OpenCurrentFolderBtn.qml
   PlayContextBasePlayingActions.qml
+  BasePlayingActionsButton.qml
+  PlayContextCover.qml
+  PlayProgressBarTimersLine.qml
+  PlayProgressBarTimeline.qml
+  VolumeControl.qml
+  PlayListActions.qml
+  PlayListActionsButton.qml
   SOURCES
   mainpagemodel.h
   mainpagemodel.cpp
@@ -38,15 +45,8 @@ qt_add_qml_module(
   ../../img/pause_pic.png
   ../../img/previous_track_pic.png
   ../../img/next_track_pic.png
-  QML_FILES
-  BasePlayingActionsButton.qml
-  QML_FILES
-  PlayContextCover.qml
-  QML_FILES
-  PlayProgressBarTimersLine.qml
-  QML_FILES
-  PlayProgressBarTimeline.qml
-  QML_FILES VolumeControl.qml)
+  ../../img/append_file.png
+  ../../img/append_folder.png)
 
 target_link_libraries(
   main_page

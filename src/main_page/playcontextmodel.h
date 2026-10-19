@@ -12,8 +12,8 @@ class PlayContextModel : public QObject {
   QML_ELEMENT
 
   Q_PROPERTY(QString coverSource READ coverSource NOTIFY coverSourceChanged)
-  Q_PROPERTY(bool contextCompletted READ contextCompletted NOTIFY
-                 contextComplettedChanged)
+  Q_PROPERTY(bool contextCompletted READ contextCompletted WRITE
+                 setContextCompletted NOTIFY contextComplettedChanged)
   Q_PROPERTY(bool previousTrackAvailable READ previousTrackAvailable NOTIFY
                  previousTrackAvailableChanged)
   Q_PROPERTY(bool nextTrackAvailable READ nextTrackAvailable NOTIFY
