@@ -51,18 +51,24 @@ void PlayContextModel::setContextCompletted(bool newContextCompletted) {
 QCoro::Task<> PlayContextModel::provideCover() {
   if (_currentTrack != nullptr && _currentTrackCover->open()) {
     auto cleanup = qScopeGuard([this] { _currentTrackCover->close(); });
-    // попытка изъять обложку с помощью ffmpeg, потому что она прячется
-    // как долбаный видеопоток!
-    if (auto fillingResult =
-            co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
-                _currentTrack, _currentTrackCover->filesystemFileName());
-        !fillingResult) {
-      qCWarning(loggingCategory) << fillingResult.error();
+    if (auto tagLibFillingResult =
+            FileManageBackend::fillCoverImagePathByTagLib(
+                _currentTrack, _currentTrackCover->filesystemFileName())) {
+      emit coverSourceChanged();
+    }
+    // попытка изъять обложку с помощью ffmpeg, потому что она может
+    // прячетаться как долбаный видеопоток!
+    else if (auto ffmpegFillingResult =
+                 co_await FileManageBackend::fillCoverImagePathByFfmpegCLI(
+                     _currentTrack, _currentTrackCover->filesystemFileName())) {
+      emit coverSourceChanged();
+    } else {
+      qCWarning(loggingCategory)
+          << tagLibFillingResult.error() << ffmpegFillingResult.error();
       _currentTrackCover->remove();
+      emit coverSourceChanged();
     }
   }
-
-  emit coverSourceChanged();
 }
 
 bool PlayContextModel::previousTrackAvailable() const {

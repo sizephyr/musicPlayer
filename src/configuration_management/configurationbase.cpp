@@ -166,14 +166,16 @@ int Base::referenceWindowHeight() const {
 }
 
 int Base::animationDurationMs() const {
-  return readFromContext(Keys::animationNode, Keys::durationMs,
-                         DefaultValues::animationDuration.count())
+  return readFromContext(
+             Keys::animationNode, Keys::durationMs,
+             QVariant::fromValue(DefaultValues::animationDuration.count()))
       .toInt();
 }
 
 int Base::notificationHideAfterMs() const {
   return readFromContext(Keys::animationNode, Keys::notificationHideAfterMs,
-                         DefaultValues::notificationHideAfterMs.count())
+                         QVariant::fromValue(
+                             DefaultValues::notificationHideAfterMs.count()))
       .toInt();
 }
 

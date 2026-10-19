@@ -13,6 +13,8 @@ class FileManageBackend {
   filesSearch(const QString& path);
   [[nodiscard]] static std::shared_ptr<Common::Mp3Description> parseMp3(
       const std::filesystem::path& filePath);
+  [[nodiscard]] static std::expected<void, QString> fillCoverImagePathByTagLib(
+      std::shared_ptr<const Common::Mp3Description>, std::filesystem::path);
   /// \brief попытка изъять обложку с помощью ffmpeg, потому что она прячется
   /// как долбанный видеопоток!
   [[nodiscard]] static QCoro::Task<std::expected<void, QString>>
@@ -22,6 +24,4 @@ class FileManageBackend {
  private:
   [[nodiscard]] static std::shared_ptr<Common::Mp3Description> parseID3(
       const std::filesystem::path& filePath);
-  [[nodiscard]] static std::optional<std::filesystem::path> getCoverImagePath(
-      QByteArrayView frameData);
 };

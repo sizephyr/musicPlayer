@@ -1,5 +1,9 @@
 #include "filemanagebackend.h"
 
+#include <taglib/attachedpictureframe.h>
+#include <taglib/id3v2tag.h>
+#include <taglib/mpegfile.h>
+
 #include <QBuffer>
 #include <QCoroProcess>
 #include <QDataStream>
@@ -162,9 +166,6 @@ std::shared_ptr<Common::Mp3Description> FileManageBackend::parseID3(
     } else if (frameID == "TPE1") {
       TrackArtist = Common::Mp3DescriptionTypes::TrackArtist(
           decodeText(frameData.toByteArray()));
-    } else if (frameID == "APIC") {
-      /// \todo попытаться нормально изымать обложки
-      coverImagePath = getCoverImagePath(frameData);
     }
 
     pos += 10 + frameSize;
@@ -175,53 +176,6 @@ std::shared_ptr<Common::Mp3Description> FileManageBackend::parseID3(
         filePath, trackTitle.value(), TrackArtist.value());
   }
   return nullptr;
-}
-
-std::optional<std::filesystem::path> FileManageBackend::getCoverImagePath(
-    QByteArrayView frameData) {
-  // В APIC-фрейме сначала идет Text Encoding (1 байт)
-  const int mimeTypeEnd = frameData.indexOf('\0', 1);
-  if (mimeTypeEnd == -1) {
-    return std::nullopt;
-  }
-
-  const QString mimeType =
-      QString::fromLatin1(frameData.slice(1, mimeTypeEnd - 1));
-
-  // Пропускаем MIME-тип и '\0', ищем конец описания картинки (Description)
-  const int descriptionEnd = frameData.indexOf('\0', mimeTypeEnd + 1);
-  if (descriptionEnd == -1) {
-    return std::nullopt;
-  }
-
-  const auto imageData = frameData.sliced(descriptionEnd + 1);
-  const char* format = nullptr;
-
-  if (mimeType.contains(QStringLiteral("jpeg")))
-    format = "JPEG";
-  else if (mimeType.contains(QStringLiteral("png")))
-    format = "PNG";
-  else {
-    qCWarning(loggingCategory)
-        << "Unsupported image format in APIC frame:" << mimeType;
-    return std::nullopt;
-  }
-
-  QImage coverImage;
-  if (!coverImage.loadFromData(reinterpret_cast<const uchar*>(imageData.data()),
-                               imageData.size(), format)) {
-    qCWarning(loggingCategory) << "Failed to load image from APIC frame";
-    return std::nullopt;
-  }
-
-  const QString tempPath = QDir::tempPath() + QStringLiteral("/coverImage.jpg");
-  if (!coverImage.save(tempPath, "JPEG")) {
-    qCWarning(loggingCategory)
-        << "Failed to save cover image to temporary path";
-    return std::nullopt;
-  }
-
-  return std::filesystem::path(tempPath.toStdString());
 }
 
 QCoro::Task<std::expected<void, QString>>
@@ -272,4 +226,49 @@ FileManageBackend::fillCoverImagePathByFfmpegCLI(
   }
 
   co_return {};
+}
+
+std::expected<void, QString> FileManageBackend::fillCoverImagePathByTagLib(
+    std::shared_ptr<const Common::Mp3Description> descr,
+    std::filesystem::path targetImagePath) {
+  TagLib::MPEG::File mpegFile(descr->path().c_str());
+  if (!mpegFile.isValid() || !mpegFile.ID3v2Tag()) {
+    return std::unexpected(
+        QStringLiteral("Невалидный MP3 файл или отсутствует ID3v2 тег."));
+  }
+
+  auto* tag = mpegFile.ID3v2Tag();
+  const auto& frameList = tag->frameListMap()["APIC"];
+  if (frameList.isEmpty()) {
+    return std::unexpected(
+        QStringLiteral("В файле не найдена обложка (APIC фрейм)."));
+  }
+
+  auto* pictureFrame =
+      static_cast<TagLib::ID3v2::AttachedPictureFrame*>(frameList.front());
+  if (!pictureFrame) {
+    return std::unexpected(QStringLiteral("Не удалось прочитать APIC фрейм."));
+  }
+
+  const auto& pictureData = pictureFrame->picture();
+  QImage coverImage;
+  if (!coverImage.loadFromData(
+          reinterpret_cast<const uchar*>(pictureData.data()),
+          pictureData.size())) {
+    return std::unexpected(
+        QStringLiteral("Не удалось загрузить изображение из тега."));
+  }
+
+  // Извлекаем расширение из targetImagePath для сохранения в нужном формате
+  // (JPEG/PNG)
+  const QString savePath = QString::fromStdString(targetImagePath.string());
+  const QByteArray format =
+      targetImagePath.extension() == ".png" ? "PNG" : "JPEG";
+
+  if (!coverImage.save(savePath, format.constData())) {
+    return std::unexpected(
+        QStringLiteral("Не удалось сохранить изображение по указанному пути."));
+  }
+
+  return {};
 }
