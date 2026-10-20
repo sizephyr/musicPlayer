@@ -6,6 +6,9 @@ Button {
     id: root
 
     icon.color: Configuration.theme.mutedWhiteColor
+    palette.buttonText: Configuration.theme.mutedWhiteColor
+    font.pixelSize: Configuration.h5PointSizeStatic
+
     background: Rectangle {
         topRightRadius: Configuration.r4RadiusStatic
         bottomRightRadius: Configuration.r4RadiusStatic

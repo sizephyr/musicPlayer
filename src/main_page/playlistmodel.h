@@ -13,6 +13,8 @@ class PlayListModel : public QAbstractListModel {
 
   Q_PROPERTY(QUuid currentTrackUid READ currentTrackUid NOTIFY
                  currentTrackChanged FINAL)
+  Q_PROPERTY(
+      bool editState READ editState WRITE setEditState NOTIFY editStateChanged)
 
  public:
   enum ItemContentRole {
@@ -25,6 +27,7 @@ class PlayListModel : public QAbstractListModel {
   explicit PlayListModel(QObject* parent = nullptr);
 
   void pushBack(std::shared_ptr<Common::Mp3Description> descr);
+  void remove(QUuid);
   void reset();
   [[nodiscard]] bool empty() const;
 
@@ -49,10 +52,16 @@ class PlayListModel : public QAbstractListModel {
   void resetCurrentTrack();
   QUuid currentTrackUid() const;
 
+  bool editState() const;
+  void setEditState(bool newEditState);
+
  signals:
   void currentTrackChanged();
 
+  void editStateChanged();
+
  private:
   QList<std::shared_ptr<Common::Mp3Description>> _container;
-  std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
+  std::shared_ptr<Common::Mp3Description> _currentTrack;
+  bool _editState;
 };

@@ -55,9 +55,13 @@ Item {
                     horizontalPaddings: view.anchors.margins
                     text: model.trackArtist + " - " + model.trackTitle
                     selected: model.uid === root.model.playListModel.currentTrackUid
+                    editState: view.model.editState
 
                     onSelect: {
                         root.model.play(uid);
+                    }
+                    onRemove: {
+                        root.model.remove(uid);
                     }
                     onSelectedChanged: {
                         if (selected)
@@ -79,9 +83,11 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             height: contentRect.height - contentRect.radius * 2
             width: hoverHandler.hovered ? parent.width * 0.10 : 0
+            playlistEmpty: view.count === 0
 
             onAppendFileCalled: root.appendFileCalled()
             onAppendFolderCalled: root.appendFolderCalled()
+            onEditCalled: root.model.playListModel.editState = !root.model.playListModel.editState
         }
 
         Connections {
@@ -96,6 +102,10 @@ Item {
                 } else {
                     SomeMediaPlayer.stop();
                 }
+            }
+            function onStopped() {
+                SomeMediaPlayer.source = "";
+                SomeMediaPlayer.stop();
             }
         }
     }

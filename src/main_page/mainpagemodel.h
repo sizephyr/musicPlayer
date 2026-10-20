@@ -27,6 +27,7 @@ class Model : public QObject {
   [[nodiscard]] PlayContextModel* playContextModel() const;
   [[nodiscard]] Q_INVOKABLE QString trackPathOf(QUuid);
   Q_INVOKABLE void play(QUuid uid);
+  Q_INVOKABLE void remove(QUuid uid);
 
   /// \brief для установки юайного синглтона в контекст
   Q_INVOKABLE void setPlayer(QMediaPlayer* newPlayer);
@@ -34,6 +35,7 @@ class Model : public QObject {
  signals:
   void coverProvided(const QString&);
   void played(QUuid);
+  void stopped();
 
  public slots:
   void onFolderSelected(const QString& newCurrentPlayFolder);

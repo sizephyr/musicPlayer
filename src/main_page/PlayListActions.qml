@@ -11,9 +11,11 @@ Item {
     visible: width > 0
 
     readonly property int baseButtonHeight: 40
+    property bool playlistEmpty
 
     signal appendFileCalled
     signal appendFolderCalled
+    signal editCalled
 
     ColumnLayout {
         anchors.fill: parent
@@ -30,6 +32,13 @@ Item {
             Layout.preferredHeight: root.baseButtonHeight
             icon.source: "img/append_folder.png"
             onClicked: root.appendFolderCalled()
+        }
+        PlayListActionsButton {
+            Layout.fillWidth: true
+            Layout.preferredHeight: root.baseButtonHeight
+            onClicked: root.editCalled()
+            text: "✎"
+            visible: !root.playlistEmpty
         }
         Item {
             Layout.fillHeight: true

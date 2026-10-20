@@ -49,6 +49,17 @@ void Model::play(QUuid uid) {
   }
 }
 
+void Model::remove(QUuid uid) {
+  if (_playListModel->currentTrack()->uid() == uid) {
+    if (_playListModel->nextTrackAvailable(uid)) {
+      play(_playListModel->next(uid)->uid());
+    } else {
+      emit stopped();
+    }
+  }
+  _playListModel->remove(uid);
+}
+
 void Model::playNext(QUuid uid) {
   if (auto nextTrack = _playListModel->next(uid)) {
     play(nextTrack->uid());  // тут хорошо бы отправлять сразу весь дескр, но

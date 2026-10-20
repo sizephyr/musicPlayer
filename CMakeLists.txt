@@ -1,29 +1,11 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.25)
 
 project(
   musicPlayer
   VERSION 0.1.7
   LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_AUTORCC ON)
-set(CMAKE_AUTOMOC ON)
-set(QML_IMPORT_PATH
-    "${CMAKE_BINARY_DIR}/src/qml"
-    CACHE PATH "Path to application qml modules" FORCE)
-
-if(CMAKE_BUILD_TYPE MATCHES "Release")
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
-
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
-
-  add_compile_definitions(
-    QT_NO_DEBUG QT_NO_DEPRECATED_WARNINGS QT_DISABLE_DEPRECATED_BEFORE=0x060B00
-    QT_USE_QSTRINGBUILDER)
-  set(CPACK_COMPONENTS_ALL Unspecified)
-endif()
-
+include(cmake/prepare_project.cmake)
 include(FetchContent)
 
 find_package(Qt6 REQUIRED COMPONENTS Quick Multimedia)
@@ -72,5 +54,7 @@ install(
 
 if(APPLE)
   include(cmake/packaging/mac_os_dmg.cmake)
+elseif(IS_DEBIAN_LIKE)
+  include(cmake/packaging/linux_appimage.cmake)
 endif()
 include(CPack)

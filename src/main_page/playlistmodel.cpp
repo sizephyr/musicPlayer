@@ -10,12 +10,26 @@ const auto coverImagePath = "coverImagePath";
 }  // namespace RoleNames
 }  // namespace
 
-PlayListModel::PlayListModel(QObject* parent) : QAbstractListModel{parent} {}
+PlayListModel::PlayListModel(QObject* parent)
+    : QAbstractListModel{parent}, _currentTrack(nullptr), _editState(false) {}
 
 void PlayListModel::pushBack(std::shared_ptr<Common::Mp3Description> descr) {
   beginInsertRows(QModelIndex(), rowCount(), rowCount());
   _container.push_back(std::move(descr));
   endInsertRows();
+}
+
+void PlayListModel::remove(QUuid uid) {
+  auto it = std::ranges::find_if(
+      _container, [&uid](const auto& descr) { return descr->uid() == uid; });
+
+  if (it != _container.end()) {
+    int row = std::distance(_container.begin(), it);
+
+    beginRemoveRows(QModelIndex(), row, row);
+    _container.erase(it);
+    endRemoveRows();
+  }
 }
 
 void PlayListModel::reset() { _container.clear(); }
@@ -134,4 +148,12 @@ void PlayListModel::resetCurrentTrack() {
 
 QUuid PlayListModel::currentTrackUid() const {
   return _currentTrack ? _currentTrack->uid() : QUuid();
+}
+
+bool PlayListModel::editState() const { return _editState; }
+
+void PlayListModel::setEditState(bool newEditState) {
+  if (_editState == newEditState) return;
+  _editState = newEditState;
+  emit editStateChanged();
 }
