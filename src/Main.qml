@@ -44,13 +44,21 @@ Window {
         ? PageManager.currentPageContextModel.pageSource : ""
     }
 
-    SettingsPage {
-        id: settingsPage
+    Loader {
+        id: settingsPageLoader
+        active: false
 
-        width: Configuration.referenceWindowWidth * 0.8
-        height: Configuration.referenceWindowHeight * 0.8
-        x: (parent.width - width) / 2
-        y: (parent.height - height) / 2
+        sourceComponent: Component {
+            SettingsPage {
+                Component.onCompleted: open()
+                onClosed: settingsPageLoader.active = false
+
+                width: Configuration.referenceWindowWidth * 0.8
+                height: Configuration.referenceWindowHeight * 0.8
+                x: (root.width - width) / 2
+                y: (root.height - height) / 2
+            }
+        }
     }
 
     Button {
@@ -72,7 +80,7 @@ Window {
             color: Configuration.theme.semiTransparentLightGrayColor
         }
 
-        onClicked: settingsPage.open()
+        onClicked: settingsPageLoader.active = true
     }
 
     Label {

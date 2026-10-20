@@ -1,12 +1,12 @@
 #include "filemanagebackend.h"
 
 #include <taglib/attachedpictureframe.h>
+#include <taglib/fileref.h>
 #include <taglib/id3v2tag.h>
 #include <taglib/mpegfile.h>
+#include <taglib/tag.h>
 
-#include <QBuffer>
 #include <QCoroProcess>
-#include <QDataStream>
 #include <QDebug>
 #include <QDir>
 #include <QFile>
@@ -18,32 +18,18 @@
 
 namespace {
 const auto loggingCategory = QLoggingCategory("file_manage_backend");
-
-// Оставляем ТОЛЬКО для заголовка ID3v2
-auto parseSynchsafeInt = [](const char* bytes) -> int {
-  return ((bytes[0] & 0x7F) << 21) | ((bytes[1] & 0x7F) << 14) |
-         ((bytes[2] & 0x7F) << 7) | (bytes[3] & 0x7F);
-};
-
-// Добавляем для размеров фреймов (ID3v2.3)
-auto parseNormalInt = [](const char* bytes) -> int {
-  return (static_cast<unsigned char>(bytes[0]) << 24) |
-         (static_cast<unsigned char>(bytes[1]) << 16) |
-         (static_cast<unsigned char>(bytes[2]) << 8) |
-         static_cast<unsigned char>(bytes[3]);
-};
-}  // namespace
+}
 
 std::expected<QList<std::filesystem::path>, QString>
 FileManageBackend::filesSearch(const QString& path) {
   const std::filesystem::path targetPath =
       QUrl(path).toLocalFile().toStdString();
 
-  qCInfo(loggingCategory) << "Target path:" << targetPath;
+  qCInfo(loggingCategory) << "Поиск mp3 файлов по пути" << targetPath;
 
   std::error_code ec;
   if (!std::filesystem::exists(targetPath, ec)) {
-    return std::unexpected(QStringLiteral("Path does not exist: ") +
+    return std::unexpected(QStringLiteral("Путь недоступен: ") +
                            QString::fromStdString(targetPath.string()));
   }
 
@@ -54,7 +40,8 @@ FileManageBackend::filesSearch(const QString& path) {
       result.append(targetPath);
       return result;
     }
-    return std::unexpected(QStringLiteral("Provided file is not an MP3 file."));
+    return std::unexpected(
+        QStringLiteral("Предоставленный файл не является mp3 файлом."));
   }
 
   if (std::filesystem::is_directory(targetPath, ec)) {
@@ -87,95 +74,28 @@ std::shared_ptr<Common::Mp3Description> FileManageBackend::parseMp3(
   return parseID3(filePath);
 }
 
-QString decodeText(const QByteArray& data) {
-  if (data.isEmpty()) {
-    return QString();
-  }
-
-  char encoding = data[0];
-  QByteArray textData = data.mid(1);
-  QString result;
-
-  if (encoding == 0) {
-    result = QString::fromLatin1(textData);
-  } else if (encoding == 1) {
-    result = QString::fromUtf16(
-        reinterpret_cast<const char16_t*>(textData.constData() + 2),
-        (textData.size() - 2) / 2);
-  } else if (encoding == 2) {
-    result = QString::fromUtf16(
-        reinterpret_cast<const char16_t*>(textData.constData()),
-        textData.size() / 2);
-  } else if (encoding == 3) {
-    result = QString::fromUtf8(textData);
-  } else {
-    result = QString::fromLatin1(textData);
-  }
-
-  while (!result.isEmpty() && result.endsWith(QChar('\0'))) {
-    result.chop(1);
-  }
-
-  return result.trimmed();
-}
-
 std::shared_ptr<Common::Mp3Description> FileManageBackend::parseID3(
     const std::filesystem::path& filePath) {
-  QFile file(filePath);
-  if (!file.open(QIODevice::ReadOnly)) {
-    qCWarning(loggingCategory) << "Cannot open file for reading:" << filePath;
+  using namespace Common::Mp3DescriptionTypes;
+
+  TagLib::FileRef f(filePath.c_str());
+  if (f.isNull() || f.tag() == nullptr) {
+    qCWarning(loggingCategory) << "Не удалось получить теги файла" << filePath;
     return nullptr;
   }
 
-  QByteArray header = file.read(10);
-  if (header.size() < 10 || !header.startsWith("ID3")) {
-    qCWarning(loggingCategory) << "No ID3 tag found in file:" << filePath;
+  if (f.tag()->title().isEmpty()) {
+    qCWarning(loggingCategory) << "Тег названия пуст";
+    return nullptr;
+  }
+  if (f.tag()->artist().isEmpty()) {
+    qCWarning(loggingCategory) << "Тег исполнителя пуст";
     return nullptr;
   }
 
-  const int tagSize = parseSynchsafeInt(header.constData() + 6);
-  const QByteArray tagData = file.read(tagSize);
-
-  int pos = 0;
-  std::optional<std::filesystem::path> coverImagePath;
-  std::optional<Common::Mp3DescriptionTypes::TrackTitle> trackTitle;
-  std::optional<Common::Mp3DescriptionTypes::TrackArtist> TrackArtist;
-  while (pos < tagSize) {
-    if (pos + 10 > tagData.size()) {
-      // qCWarning(loggingCategory)
-      //     << "Incomplete frame header at position:" << pos;
-      break;
-    }
-
-    const char* frameHeaderPtr = tagData.constData() + pos;
-    const int frameSize = parseNormalInt(frameHeaderPtr + 4);
-
-    if (pos + 10 + frameSize > tagData.size()) {
-      qCWarning(loggingCategory) << "Incomplete frame data at position:" << pos;
-      break;
-    }
-
-    // C++23/Qt 6: используем легковесный QByteArrayView вместо выделения памяти
-    // через mid()
-    const QByteArrayView frameID(frameHeaderPtr, 4);
-    const QByteArrayView frameData(frameHeaderPtr + 10, frameSize);
-
-    if (frameID == "TIT2") {
-      trackTitle = Common::Mp3DescriptionTypes::TrackTitle(
-          decodeText(frameData.toByteArray()));
-    } else if (frameID == "TPE1") {
-      TrackArtist = Common::Mp3DescriptionTypes::TrackArtist(
-          decodeText(frameData.toByteArray()));
-    }
-
-    pos += 10 + frameSize;
-  }
-
-  if (trackTitle.has_value() && TrackArtist.has_value()) {
-    return std::make_shared<Common::Mp3Description>(
-        filePath, trackTitle.value(), TrackArtist.value());
-  }
-  return nullptr;
+  return std::make_shared<Common::Mp3Description>(
+      filePath, TrackTitle(f.tag()->title().to8Bit(true)),
+      TrackArtist(f.tag()->artist().to8Bit(true)));
 }
 
 QCoro::Task<std::expected<void, QString>>
@@ -183,10 +103,9 @@ FileManageBackend::fillCoverImagePathByFfmpegCLI(
     std::shared_ptr<const Common::Mp3Description> descr,
     std::filesystem::path targetImagePath) {
   QProcess process;
-
   QString ffmpegPath = QStandardPaths::findExecutable(QStringLiteral("ffmpeg"));
 
-#ifdef Q_OS_MAC  // ищем ффмпег, установленый через брю
+#ifdef Q_OS_MAC
   if (ffmpegPath.isEmpty()) {
     ffmpegPath = QStandardPaths::findExecutable(
         QStringLiteral("ffmpeg"), {QStringLiteral("/opt/homebrew/bin"),
@@ -259,8 +178,6 @@ std::expected<void, QString> FileManageBackend::fillCoverImagePathByTagLib(
         QStringLiteral("Не удалось загрузить изображение из тега."));
   }
 
-  // Извлекаем расширение из targetImagePath для сохранения в нужном формате
-  // (JPEG/PNG)
   const QString savePath = QString::fromStdString(targetImagePath.string());
   const QByteArray format =
       targetImagePath.extension() == ".png" ? "PNG" : "JPEG";

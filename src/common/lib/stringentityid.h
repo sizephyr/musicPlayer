@@ -84,6 +84,20 @@ struct StringEntityId {
     validate(value);
   }
 
+  explicit StringEntityId(const std::string& val)
+      : value(QString::fromStdString(val)) {
+    validate(value);
+  }
+
+  [[nodiscard]] static std::optional<StringEntityId> fromString(
+      const std::string& val) noexcept {
+    QString qstr = QString::fromStdString(val);
+    if (isValid(qstr)) {
+      return StringEntityId(std::move(qstr), InternalConstruct{});
+    }
+    return std::nullopt;
+  }
+
   /// Статический метод для безопасного создания (std::optional)
   [[nodiscard]] static std::optional<StringEntityId> fromString(
       const QString& val) noexcept {

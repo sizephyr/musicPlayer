@@ -12,7 +12,7 @@ Popup {
     focus: true
     dim: false
 
-    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutsideParent
+    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
     background: Rectangle {
         color: Configuration.theme.extrapolateAlpha(Configuration.theme.darkGrayColor, 0.1)
