@@ -35,6 +35,7 @@ void PlayContextModel::setCurrentTrack(
 
 void PlayContextModel::resetCurrentTrack() {
   _currentTrack.reset();
+  _currentTrackCover->remove();
   emit coverSourceChanged();
 }
 

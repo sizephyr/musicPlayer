@@ -50,11 +50,18 @@ void Model::play(QUuid uid) {
 }
 
 void Model::remove(QUuid uid) {
-  if (_playListModel->currentTrack()->uid() == uid) {
+  if (_playListModel == nullptr) {
+    qCWarning(loggingCategory)
+        << "Попытка удаления, пока модель плейлиста невалидна";
+  }
+  if (auto currentTrack = _playListModel->currentTrack();
+      currentTrack != nullptr && currentTrack->uid() == uid) {
     if (_playListModel->nextTrackAvailable(uid)) {
       play(_playListModel->next(uid)->uid());
     } else {
       emit stopped();
+      _playListModel->resetCurrentTrack();
+      _playContextModel->resetCurrentTrack();
     }
   }
   _playListModel->remove(uid);
