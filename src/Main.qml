@@ -35,6 +35,7 @@ Window {
 
     BackgroundImage {
         anchors.fill: parent
+        opacity: Configuration.showBackground ? 1.0 : 0.0
     }
 
     Loader {

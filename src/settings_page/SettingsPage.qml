@@ -79,6 +79,18 @@ Popup {
                     defaultSuffix: "png"
                     onAccepted: Configuration.windowBackground = selectedFile
                 }
+                SettingsCheckBox {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 50
+                    text: "Показать фоновую картинку"
+                    checked: Configuration.showBackground
+                    onCheckedChanged: {
+                        if (Configuration.showBackground !== checked) {
+                            Configuration.showBackground = checked;
+                        }
+                    }
+                }
+
                 Item {
                     Layout.fillWidth: true
                     Layout.fillHeight: true

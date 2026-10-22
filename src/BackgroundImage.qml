@@ -30,4 +30,11 @@ Item {
         maskEnabled: !!(Configuration.windowFlags & Qt.FramelessWindowHint)
         maskSource: backgroundImageMaskRectangle
     }
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: Configuration.animationDurationMs
+            easing.type: Easing.InOutQuad
+        }
+    }
 }

@@ -21,6 +21,7 @@ constinit const auto notificationHideAfterMs = std::chrono::milliseconds(4000);
 constinit const auto referenceDisplaySize = QSize(1000, 600);
 constinit const auto backgroundTransparentnesRatio = 0.6;
 constinit const auto volumeRatio = 0.25;
+constinit const auto showBackground = true;
 }  // namespace DefaultValues
 
 constinit const auto applicationConfigFilename = "ApplicationConfig.json";
@@ -37,6 +38,7 @@ constinit const auto width = "width";
 constinit const auto height = "height";
 constinit const auto title = "title";
 constinit const auto background = "background";
+constinit const auto showBackground = "show_background";
 constinit const auto durationMs = "duration_ms";
 constinit const auto notificationHideAfterMs = "notification_hide_after_ms";
 constinit const auto baseTransferTimeoutMs = "base_transfer_timeout_ms";
@@ -275,6 +277,21 @@ void Base::setWindowBackground(const QString& newWindowBackground) {
   writeInContext(Keys::windowNode, Keys::background, filename);
 
   emit windowBackgroundChanged();
+}
+
+bool Base::showBackground() const {
+  return readFromContext(Keys::windowNode, Keys::showBackground,
+                         DefaultValues::showBackground)
+      .toBool();
+}
+
+void Base::setShowBackground(bool newShowBackground) {
+  if (showBackground() == newShowBackground) {
+    return;
+  }
+
+  writeInContext(Keys::windowNode, Keys::showBackground, newShowBackground);
+  emit showBackgroundChanged();
 }
 
 }  // namespace Configuration

@@ -16,7 +16,8 @@ qt_add_qml_module(
   SectionItem.qml
   SettingsItem.qml
   SettingsSlider.qml
-  SettingsFileSellector.qml)
+  SettingsFileSellector.qml
+  QML_FILES SettingsCheckBox.qml)
 
 target_link_libraries(settings_page PRIVATE Qt6::Gui Qt6::Quick commonplugin
                                             common_lib configurationplugin)

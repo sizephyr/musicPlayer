@@ -29,6 +29,8 @@ class Base : public QObject {
               backgroundTransparentnesRatioChanged)
   Q_PROPERTY(double volumeRatio READ volumeRatio WRITE setVolumeRatio NOTIFY
                  volumeRatioChanged)
+  Q_PROPERTY(bool showBackground READ showBackground WRITE setShowBackground
+                 NOTIFY showBackgroundChanged)
 
  public:
   explicit Base(QObject* parent = nullptr);
@@ -44,12 +46,14 @@ class Base : public QObject {
   [[nodiscard]] static Qt::WindowFlags windowFlags();
   [[nodiscard]] double backgroundTransparentnesRatio() const;
   [[nodiscard]] double volumeRatio() const;
+  [[nodiscard]] bool showBackground() const;
 
   void setDisplaySize(QSize);
   void setBackgroundTransparentnesRatio(
       double newBackgroundTransparentnesRatio);
   void setVolumeRatio(double newVolumeRatio);
   void setWindowBackground(const QString& newWindowBackground);
+  void setShowBackground(bool newShowBackground);
 
  signals:
   void connectionConfiguredChanged();
@@ -58,6 +62,7 @@ class Base : public QObject {
   void backgroundTransparentnesRatioChanged();
   void volumeRatioChanged();
   void windowBackgroundChanged();
+  void showBackgroundChanged();
 
  private:
   [[nodiscard]] static std::expected<void, QString> loadDefaultConfig(
