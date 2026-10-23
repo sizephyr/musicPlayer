@@ -3,15 +3,16 @@
 #include <QObject>
 #include <QQuickWindow>
 
-class WindowHelper : public QObject {
+class MacOSWindowHelper : public QObject {
   Q_OBJECT
  public:
-  explicit WindowHelper(QQuickWindow* window);
+  explicit MacOSWindowHelper(QQuickWindow* window);
 
  private slots:
   void handleWindowStateChanged(Qt::WindowState state);
+  void handleWindowFlagsChanged(Qt::WindowFlags flags);
 
  private:
   void applyMacTransparentTitlebar();
-  QQuickWindow* m_window;
+  QQuickWindow* _window;
 };

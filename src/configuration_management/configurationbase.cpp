@@ -100,6 +100,10 @@ Base::Base(QObject* parent)
     }
     qCInfo(loggingCategory) << "Загружена конфигурация по-умолчанию";
   }
+
+#ifdef Q_OS_MAC
+  connect(this, &Base::showBackgroundChanged, this, &Base::windowFlagsChanged);
+#endif
 }
 
 void Base::setDisplaySize(QSize size) {
@@ -221,12 +225,16 @@ double Base::scaleFactor() const {
   return average(displaySize()) / average(DefaultValues::referenceDisplaySize);
 }
 
-Qt::WindowFlags Base::windowFlags() {
+Qt::WindowFlags Base::windowFlags() const {
   {
 #if defined(Q_OS_LINUX)
     return Qt::Window | Qt::FramelessWindowHint;
 #elif defined(Q_OS_MAC)
-    return Qt::Window;
+    if (showBackground()) {
+      return Qt::Window;
+    } else {
+      return Qt::Window | Qt::FramelessWindowHint;
+    }
 #else
     return Qt::Window;
 #endif

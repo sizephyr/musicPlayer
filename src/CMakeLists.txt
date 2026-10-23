@@ -16,8 +16,8 @@ qt_add_qml_module(
   Main.qml
   BackgroundImage.qml
   SOURCES
-  windowhelper.h
-  windowhelper.cpp
+  macoswindowhelper.h
+  macoswindowhelper.cpp
   logger.h
   logger.cpp
   RESOURCES

@@ -5,7 +5,7 @@
 #endif
 
 #include "logger.h"
-#include "windowhelper.h"
+#include "macoswindowhelper.h"
 
 int main(int argc, char* argv[]) {
   QGuiApplication app(argc, argv);
@@ -26,12 +26,14 @@ int main(int argc, char* argv[]) {
   }
 #endif
 
+#ifdef Q_OS_MAC
   if (!engine.rootObjects().isEmpty()) {
     if (auto* window =
             qobject_cast<QQuickWindow*>(engine.rootObjects().first())) {
-      new WindowHelper(window);
+      new MacOSWindowHelper(window);
     }
   }
+#endif
 
   return QGuiApplication::exec();
 }

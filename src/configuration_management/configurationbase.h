@@ -22,7 +22,8 @@ class Base : public QObject {
   Q_PROPERTY(int notificationHideAfterMs READ notificationHideAfterMs CONSTANT)
   Q_PROPERTY(QString windowBackground READ windowBackground WRITE
                  setWindowBackground NOTIFY windowBackgroundChanged)
-  Q_PROPERTY(Qt::WindowFlags windowFlags READ windowFlags CONSTANT)
+  Q_PROPERTY(
+      Qt::WindowFlags windowFlags READ windowFlags NOTIFY windowFlagsChanged)
   Q_PROPERTY(
       double backgroundTransparentnesRatio READ backgroundTransparentnesRatio
           WRITE setBackgroundTransparentnesRatio NOTIFY
@@ -43,7 +44,7 @@ class Base : public QObject {
   [[nodiscard]] QString windowBackground() const;
   [[nodiscard]] QSize displaySize() const;
   [[nodiscard]] double scaleFactor() const;
-  [[nodiscard]] static Qt::WindowFlags windowFlags();
+  [[nodiscard]] Qt::WindowFlags windowFlags() const;
   [[nodiscard]] double backgroundTransparentnesRatio() const;
   [[nodiscard]] double volumeRatio() const;
   [[nodiscard]] bool showBackground() const;
@@ -63,6 +64,7 @@ class Base : public QObject {
   void volumeRatioChanged();
   void windowBackgroundChanged();
   void showBackgroundChanged();
+  void windowFlagsChanged();
 
  private:
   [[nodiscard]] static std::expected<void, QString> loadDefaultConfig(

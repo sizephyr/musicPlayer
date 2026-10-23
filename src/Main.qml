@@ -11,7 +11,12 @@ Window {
     height: Configuration.displaySize.height
     minimumWidth: Configuration.referenceWindowWidth
     minimumHeight: Configuration.referenceWindowHeight
-    flags: Configuration.windowFlags
+
+    Binding {
+        target: root
+        property: "flags"
+        value: Configuration.windowFlags
+    }
 
     visible: true
     color: "transparent"

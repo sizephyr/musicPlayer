@@ -1,37 +1,43 @@
-#include "windowhelper.h"
+#include "macoswindowhelper.h"
 
 #ifdef Q_OS_MAC
 #include <objc/message.h>
 #include <objc/runtime.h>
 #endif
 
-WindowHelper::WindowHelper(QQuickWindow* window)
-    : QObject(window), m_window(window) {
-  if (!m_window) return;
+MacOSWindowHelper::MacOSWindowHelper(QQuickWindow* window)
+    : QObject(window), _window(window) {
+  if (!_window) return;
 
   // Подключаемся к сигналу изменения состояния окна
-  connect(m_window, &QQuickWindow::windowStateChanged, this,
-          &WindowHelper::handleWindowStateChanged);
+  connect(_window, &QQuickWindow::windowStateChanged, this,
+          &MacOSWindowHelper::handleWindowStateChanged);
+  connect(_window, &QQuickWindow::flagsChanged, this,
+          &MacOSWindowHelper::handleWindowFlagsChanged);
 
   // Применяем настройки сразу при инициализации
   applyMacTransparentTitlebar();
 }
 
-void WindowHelper::handleWindowStateChanged(Qt::WindowState state) {
+void MacOSWindowHelper::handleWindowStateChanged(Qt::WindowState state) {
   // Если окно вернулось в нормальное состояние или максимизировано (не Full
   // Screen)
   if (state == Qt::WindowNoState || state == Qt::WindowMaximized) {
     // macOS сбрасывает маску не сразу, даем Qt завершить переход
-    QMetaObject::invokeMethod(this, &WindowHelper::applyMacTransparentTitlebar,
+    QMetaObject::invokeMethod(this, &MacOSWindowHelper::applyMacTransparentTitlebar,
                               Qt::QueuedConnection);
   }
 }
 
-void WindowHelper::applyMacTransparentTitlebar() {
-#ifdef Q_OS_MAC
-  if (!m_window) return;
+void MacOSWindowHelper::handleWindowFlagsChanged(Qt::WindowFlags flags) {
+  QMetaObject::invokeMethod(this, &MacOSWindowHelper::applyMacTransparentTitlebar,
+                            Qt::QueuedConnection);
+}
 
-  if (auto nativeView = reinterpret_cast<id>(m_window->winId())) {
+void MacOSWindowHelper::applyMacTransparentTitlebar() {
+  if (!_window) return;
+
+  if (auto nativeView = reinterpret_cast<id>(_window->winId())) {
     SEL windowSelector = sel_registerName("window");
     auto cocoaWindow =
         ((id (*)(id, SEL))objc_msgSend)(nativeView, windowSelector);
@@ -60,5 +66,4 @@ void WindowHelper::applyMacTransparentTitlebar() {
                                                    setVisibilitySel, 1);
     }
   }
-#endif
 }
