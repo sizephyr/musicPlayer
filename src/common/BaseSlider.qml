@@ -13,6 +13,7 @@ Rectangle {
     border.color: Configuration.theme.semiTransparentLightGrayColor
     radius: Configuration.r3RadiusStatic
     opacity: canShow ? 1.0 : 0.0
+    visible: opacity > 0.0
 
     property bool canShow: true
     property double value

@@ -13,10 +13,3 @@ void Core::setPageManager(PageManagement::PageManager* pageManager) {
           PageManagement::SimplePageContextWithModel<MainPage::Model>>(nullptr,
                                                                        ""));
 }
-
-void Core::setConfiguredState(bool configured) {
-  _configured = configured;
-  emit connectionConfiguredChanged();
-}
-
-bool Core::connectionConfigured() const { return _configured; }

@@ -71,6 +71,7 @@ template <typename T>
 concept HasPattern = requires {
   { T::pattern } -> std::convertible_to<QStringView>;
 };
+
 template <typename Tag>
 struct StringEntityId {
   QString value;
