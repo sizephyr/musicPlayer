@@ -1,5 +1,7 @@
 #pragma once
 
+#ifdef Q_OS_MAC
+
 #include <QObject>
 #include <QQuickWindow>
 
@@ -16,3 +18,5 @@ class MacOSWindowHelper : public QObject {
   void applyMacTransparentTitlebar();
   QQuickWindow* _window;
 };
+
+#endif

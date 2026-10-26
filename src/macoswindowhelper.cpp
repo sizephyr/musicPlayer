@@ -1,9 +1,9 @@
 #include "macoswindowhelper.h"
 
 #ifdef Q_OS_MAC
+
 #include <objc/message.h>
 #include <objc/runtime.h>
-#endif
 
 MacOSWindowHelper::MacOSWindowHelper(QQuickWindow* window)
     : QObject(window), _window(window) {
@@ -24,13 +24,15 @@ void MacOSWindowHelper::handleWindowStateChanged(Qt::WindowState state) {
   // Screen)
   if (state == Qt::WindowNoState || state == Qt::WindowMaximized) {
     // macOS сбрасывает маску не сразу, даем Qt завершить переход
-    QMetaObject::invokeMethod(this, &MacOSWindowHelper::applyMacTransparentTitlebar,
+    QMetaObject::invokeMethod(this,
+                              &MacOSWindowHelper::applyMacTransparentTitlebar,
                               Qt::QueuedConnection);
   }
 }
 
 void MacOSWindowHelper::handleWindowFlagsChanged(Qt::WindowFlags flags) {
-  QMetaObject::invokeMethod(this, &MacOSWindowHelper::applyMacTransparentTitlebar,
+  QMetaObject::invokeMethod(this,
+                            &MacOSWindowHelper::applyMacTransparentTitlebar,
                             Qt::QueuedConnection);
 }
 
@@ -67,3 +69,5 @@ void MacOSWindowHelper::applyMacTransparentTitlebar() {
     }
   }
 }
+
+#endif
