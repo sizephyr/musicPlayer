@@ -46,7 +46,8 @@ qt_add_qml_module(
   ../../img/previous_track_pic.png
   ../../img/next_track_pic.png
   ../../img/append_file.png
-  ../../img/append_folder.png)
+  ../../img/append_folder.png
+  SOURCES macosplaycontext.h)
 
 target_link_libraries(
   main_page
@@ -59,6 +60,12 @@ target_link_libraries(
           common_lib
           configurationplugin
           page_managerplugin)
+
+if(APPLE)
+  enable_language(OBJCXX)
+  target_link_libraries(main_page PRIVATE "-framework MediaPlayer")
+  target_sources(main_page PRIVATE macosplaycontext.mm)
+endif()
 
 target_include_directories(main_pageplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 

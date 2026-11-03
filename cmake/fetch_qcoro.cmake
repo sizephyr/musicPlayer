@@ -28,14 +28,14 @@ if(NOT QCoro6_FOUND)
   set(QCORO_WITH_QTWIDGETS
       OFF
       CACHE BOOL "Disable QCoro QtWidgets support" FORCE)
-  set(QCORO_WITH_QTQUICK
-      OFF
-      CACHE BOOL "Disable QCoro QtQuick support" FORCE)
   set(QCORO_WITH_QTWEBSOCKETS
       OFF
       CACHE BOOL "Disable QCoro QtWebSockets support" FORCE)
+  set(QCORO_WITH_QTQUICK
+      ON
+      CACHE BOOL "Disable QCoro QtQuick support" FORCE)
   set(QCORO_WITH_QML
-      OFF
+      ON
       CACHE BOOL "Disable QCoro QML support" FORCE)
   set(BUILD_SHARED_LIBS
       ON

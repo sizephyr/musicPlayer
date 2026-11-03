@@ -3,6 +3,7 @@
 #include <mp3description.h>
 
 #include <QCoroTask>
+#include <QMediaPlayer>
 #include <QObject>
 #include <QQmlEngine>
 #include <QTemporaryFile>
@@ -18,20 +19,23 @@ class PlayContextModel : public QObject {
                  previousTrackAvailableChanged)
   Q_PROPERTY(bool nextTrackAvailable READ nextTrackAvailable NOTIFY
                  nextTrackAvailableChanged)
+
  public:
   explicit PlayContextModel(QObject* parent = nullptr);
 
   [[nodiscard]] QString coverSource() const;
   void setCurrentTrack(std::shared_ptr<Common::Mp3Description> newCurrentTrack);
   void resetCurrentTrack();
-
   [[nodiscard]] bool contextCompletted() const;
   void setContextCompletted(bool newContextCompletted);
-
   [[nodiscard]] bool previousTrackAvailable() const;
   void setPreviousTrackAvailability(bool);
   [[nodiscard]] bool nextTrackAvailable() const;
   void setNextTrackAvailability(bool);
+
+  /// \brief установка контекста плеера, который в UI является синглтоном, чтобы
+  /// передать его данные в ОС
+  Q_INVOKABLE void setPlayerContext(QMediaPlayer*);
 
  signals:
   void callCoverSourceProviding();
@@ -47,8 +51,9 @@ class PlayContextModel : public QObject {
 
  private:  // NOLINT
   bool _contextCompletted;
-  std::shared_ptr<Common::Mp3Description> _currentTrack{nullptr};
-  QTemporaryFile* _currentTrackCover{nullptr};
+  std::shared_ptr<Common::Mp3Description> _currentTrack;
+  QTemporaryFile* _currentTrackCover;
   bool _previousTrackAvailable;
   bool _nextTrackAvailable;
+  QMediaPlayer* _playerContext;
 };

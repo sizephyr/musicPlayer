@@ -8,6 +8,10 @@ Item {
 
     property PlayContextModel model
 
+    Component.onCompleted: {
+        model.setPlayerContext(SomeMediaPlayer);
+    }
+
     Item {
         anchors.centerIn: parent
         width: 500

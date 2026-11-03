@@ -113,9 +113,7 @@ void Model::onFolderSelected(const QString& newCurrentPlayFolder) {
 }
 
 void Model::onFileSelected(const QString& sellectedFilePath) {
-  // по сути, это нецелевое использование метода FileManageBackend::filesSearch,
-  // но пока что пусть
-  if (auto filesListExp = FileManageBackend::filesSearch(sellectedFilePath)) {
+  if (auto filesListExp = FileManageBackend::collectMp3(sellectedFilePath)) {
     for (const auto& filepath : filesListExp.value()) {
       collectFile(filepath);
     }

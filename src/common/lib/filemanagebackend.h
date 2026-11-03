@@ -11,6 +11,9 @@ class FileManageBackend {
  public:
   [[nodiscard]] static std::expected<QList<std::filesystem::path>, QString>
   filesSearch(const QString& path);
+  [[nodiscard]] static std::expected<QList<std::filesystem::path>, QString>
+  collectMp3(const QString& path);
+
   [[nodiscard]] static std::shared_ptr<Common::Mp3Description> parseMp3(
       const std::filesystem::path& filePath);
   [[nodiscard]] static std::expected<void, QString> fillCoverImagePathByTagLib(

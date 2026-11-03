@@ -18,7 +18,25 @@
 
 namespace {
 const auto loggingCategory = QLoggingCategory("file_manage_backend");
+
+auto listMp3s(const auto& path) {
+  return std::filesystem::directory_iterator(
+             path, std::filesystem::directory_options::skip_permission_denied) |
+         std::views::filter(
+             [](const auto& entry) { return entry.is_regular_file(); }) |
+         std::views::filter([](const auto& entry) {
+           return entry.path().extension() == ".mp3";
+         }) |
+         std::views::transform([](const auto& entry) { return entry.path(); });
 }
+auto listSubdirectories(const auto& path) {
+  return std::filesystem::directory_iterator(
+             path, std::filesystem::directory_options::skip_permission_denied) |
+         std::views::filter([](const std::filesystem::directory_entry& entry) {
+           return entry.is_directory();
+         });
+}
+}  // namespace
 
 std::expected<QList<std::filesystem::path>, QString>
 FileManageBackend::filesSearch(const QString& path) {
@@ -34,29 +52,14 @@ FileManageBackend::filesSearch(const QString& path) {
   }
 
   QList<std::filesystem::path> result;
-
-  if (std::filesystem::is_regular_file(targetPath, ec)) {
-    if (targetPath.extension() == ".mp3") {
-      result.append(targetPath);
-      return result;
-    }
-    return std::unexpected(
-        QStringLiteral("Предоставленный файл не является mp3 файлом."));
-  }
-
   if (std::filesystem::is_directory(targetPath, ec)) {
-    auto mp3FilesView =
-        std::filesystem::directory_iterator(
-            targetPath,
-            std::filesystem::directory_options::skip_permission_denied) |
-        std::views::filter(
-            [](const auto& entry) { return entry.is_regular_file(); }) |
-        std::views::filter([](const auto& entry) {
-          return entry.path().extension() == ".mp3";
-        }) |
-        std::views::transform([](const auto& entry) { return entry.path(); });
+    std::ranges::copy(listMp3s(targetPath), std::back_inserter(result));
 
-    std::ranges::copy(mp3FilesView, std::back_inserter(result));
+    // а так же в список добавляем файлы из поддиректорий первого уровня
+    // вложенности (пока что это мой юзеркейс, поэтому статично)
+    for (const auto& dir : listSubdirectories(targetPath)) {
+      std::ranges::copy(listMp3s(dir), std::back_inserter(result));
+    }
 
     if (result.isEmpty()) {
       return std::unexpected(
@@ -66,7 +69,32 @@ FileManageBackend::filesSearch(const QString& path) {
     return result;
   }
 
-  return std::unexpected(QStringLiteral("Unsupported file system object."));
+  return std::unexpected(
+      QStringLiteral("Переданный путь не является директорией."));
+}
+
+std::expected<QList<std::filesystem::path>, QString>
+FileManageBackend::collectMp3(const QString& path) {
+  const std::filesystem::path targetPath =
+      QUrl(path).toLocalFile().toStdString();
+
+  qCInfo(loggingCategory) << "Поиск mp3 файлов по пути" << targetPath;
+
+  std::error_code ec;
+  if (!std::filesystem::exists(targetPath, ec)) {
+    return std::unexpected(QStringLiteral("Путь недоступен: ") +
+                           QString::fromStdString(targetPath.string()));
+  }
+
+  if (std::filesystem::is_regular_file(targetPath, ec)) {
+    if (targetPath.extension() == ".mp3") {
+      return QList<std::filesystem::path>{targetPath};
+    }
+    return std::unexpected(
+        QStringLiteral("Предоставленный файл не является mp3 файлом."));
+  }
+
+  return std::unexpected(QStringLiteral("Переданный путь не является файлом."));
 }
 
 std::shared_ptr<Common::Mp3Description> FileManageBackend::parseMp3(
