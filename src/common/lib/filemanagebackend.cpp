@@ -19,58 +19,42 @@
 namespace {
 const auto loggingCategory = QLoggingCategory("file_manage_backend");
 
-auto listMp3s(const auto& path) {
-  return std::filesystem::directory_iterator(
-             path, std::filesystem::directory_options::skip_permission_denied) |
-         std::views::filter(
-             [](const auto& entry) { return entry.is_regular_file(); }) |
-         std::views::filter([](const auto& entry) {
-           return entry.path().extension() == ".mp3";
-         }) |
-         std::views::transform([](const auto& entry) { return entry.path(); });
-}
-auto listSubdirectories(const auto& path) {
-  return std::filesystem::directory_iterator(
-             path, std::filesystem::directory_options::skip_permission_denied) |
-         std::views::filter([](const std::filesystem::directory_entry& entry) {
-           return entry.is_directory();
-         });
-}
+auto isMp3 = [](const auto& entry) {
+  return entry.is_regular_file() && entry.path().extension() == ".mp3";
+};
 }  // namespace
 
 std::expected<QList<std::filesystem::path>, QString>
 FileManageBackend::filesSearch(const QString& path) {
   const std::filesystem::path targetPath =
       QUrl(path).toLocalFile().toStdString();
+  const auto options =
+      std::filesystem::directory_options::skip_permission_denied;
 
   qCInfo(loggingCategory) << "Поиск mp3 файлов по пути" << targetPath;
 
-  std::error_code ec;
-  if (!std::filesystem::exists(targetPath, ec)) {
-    return std::unexpected(QStringLiteral("Путь недоступен: ") +
-                           QString::fromStdString(targetPath.string()));
+  if (!std::filesystem::exists(targetPath)) {
+    return std::unexpected(QStringLiteral("Путь недоступен: ") + path);
   }
+
+  if (!std::filesystem::is_directory(targetPath)) {
+    return std::unexpected(
+        QStringLiteral("Переданный путь не является директорией."));
+  }
+
+  auto recursiveFiles =
+      std::filesystem::recursive_directory_iterator(targetPath, options) |
+      std::views::filter(isMp3) |
+      std::views::transform([](const auto& entry) { return entry.path(); });
 
   QList<std::filesystem::path> result;
-  if (std::filesystem::is_directory(targetPath, ec)) {
-    std::ranges::copy(listMp3s(targetPath), std::back_inserter(result));
+  std::ranges::copy(recursiveFiles, std::back_inserter(result));
 
-    // а так же в список добавляем файлы из поддиректорий первого уровня
-    // вложенности (пока что это мой юзеркейс, поэтому статично)
-    for (const auto& dir : listSubdirectories(targetPath)) {
-      std::ranges::copy(listMp3s(dir), std::back_inserter(result));
-    }
-
-    if (result.isEmpty()) {
-      return std::unexpected(
-          QStringLiteral("No MP3 files found in directory."));
-    }
-
-    return result;
+  if (result.isEmpty()) {
+    return std::unexpected(QStringLiteral("Не найдены MP3-файлы."));
   }
 
-  return std::unexpected(
-      QStringLiteral("Переданный путь не является директорией."));
+  return result;
 }
 
 std::expected<QList<std::filesystem::path>, QString>

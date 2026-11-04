@@ -103,6 +103,7 @@ void Model::setPlayer(QMediaPlayer* newPlayer) {
 void Model::onFolderSelected(const QString& newCurrentPlayFolder) {
   if (auto filesListExp =
           FileManageBackend::filesSearch(newCurrentPlayFolder)) {
+    qCDebug(loggingCategory) << "+";
     for (const auto& filepath : filesListExp.value()) {
       collectFile(filepath);
     }
