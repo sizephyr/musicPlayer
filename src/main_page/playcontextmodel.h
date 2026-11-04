@@ -3,7 +3,6 @@
 #include <mp3description.h>
 
 #include <QCoroTask>
-#include <QMediaPlayer>
 #include <QObject>
 #include <QQmlEngine>
 #include <QTemporaryFile>
@@ -33,10 +32,6 @@ class PlayContextModel : public QObject {
   [[nodiscard]] bool nextTrackAvailable() const;
   void setNextTrackAvailability(bool);
 
-  /// \brief установка контекста плеера, который в UI является синглтоном, чтобы
-  /// передать его данные в ОС
-  Q_INVOKABLE void setPlayerContext(QMediaPlayer*);
-
  signals:
   void callCoverSourceProviding();
   void coverSourceChanged();
@@ -55,5 +50,4 @@ class PlayContextModel : public QObject {
   QTemporaryFile* _currentTrackCover;
   bool _previousTrackAvailable;
   bool _nextTrackAvailable;
-  QMediaPlayer* _playerContext;
 };

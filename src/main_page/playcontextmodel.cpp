@@ -6,10 +6,6 @@
 #include <QLoggingCategory>
 #include <QMediaMetaData>
 
-#ifdef Q_OS_MAC
-#include "macosplaycontext.h"
-#endif
-
 namespace {
 const auto loggingCategory = QLoggingCategory("play_context_model");
 }
@@ -21,8 +17,7 @@ PlayContextModel::PlayContextModel(QObject* parent)
       _currentTrackCover(new QTemporaryFile(
           QDir::tempPath() + "/current_cover_XXXXXX.png", this)),
       _previousTrackAvailable(false),
-      _nextTrackAvailable(false),
-      _playerContext(nullptr) {
+      _nextTrackAvailable(false) {
   connect(this, &PlayContextModel::callCoverSourceProviding, this,
           &PlayContextModel::provideCover);
 }
@@ -99,53 +94,3 @@ void PlayContextModel::setNextTrackAvailability(bool isAvailable) {
   _nextTrackAvailable = isAvailable;
   emit nextTrackAvailableChanged();
 }
-
-#ifdef Q_OS_MAC
-void PlayContextModel::setPlayerContext(QMediaPlayer* playerContext) {
-  if (playerContext == nullptr) {
-    qCWarning(loggingCategory)
-        << "Попытка установить контекст невалидного медиаплеера";
-    return;
-  }
-  _playerContext = playerContext;
-  MacOsPlayContext::setupRemoteTransportControls(playerContext);
-
-  connect(_playerContext, &QMediaPlayer::metaDataChanged, this, [this]() {
-    auto title = _playerContext->metaData().stringValue(QMediaMetaData::Title);
-    if (title.isEmpty()) {
-      title = _playerContext->source().fileName();
-    }
-
-    double durationSeconds =
-        static_cast<double>(_playerContext->duration()) / 1000.0;
-
-    MacOsPlayContext::updateTrackMetadata(title, durationSeconds);
-  });
-
-  connect(_playerContext, &QMediaPlayer::playbackStateChanged, this,
-          [position = _playerContext->position()](auto state) {
-            double elapsedSeconds = static_cast<double>(position) / 1000.0;
-            bool isPlaying = (state == QMediaPlayer::PlayingState);
-
-            MacOsPlayContext::updatePlaybackState(elapsedSeconds, isPlaying);
-          });
-
-  connect(_playerContext, &QMediaPlayer::positionChanged, this,
-          [isPlaying = _playerContext->playbackState() ==
-                       QMediaPlayer::PlayingState](auto positionMs) {
-            static qint64 lastSystemPositionMs = 0;
-            auto diff = std::abs(positionMs - lastSystemPositionMs);
-
-            if (diff > 1500) {
-              double elapsedSeconds = static_cast<double>(positionMs) / 1000.0;
-              MacOsPlayContext::updatePlaybackState(elapsedSeconds, isPlaying);
-            }
-
-            if (isPlaying) {
-              lastSystemPositionMs = positionMs;
-            }
-          });
-}
-#elif Q_OS_LINUX
-/// \todo
-#endif

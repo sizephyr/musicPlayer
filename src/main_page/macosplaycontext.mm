@@ -1,33 +1,43 @@
 #include "macosplaycontext.h"
+#include "mainpagemodel.h"
 
 #import <MediaPlayer/MediaPlayer.h>
 
-void MacOsPlayContext::setupRemoteTransportControls(QMediaPlayer* player) {
+void MacOsPlayContext::setupRemoteTransportControls(MainPage::Model* mainPageModel) {
   // Получение доступа к системному центру команд
   MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
 
-  // Обработка сигнала воспроизведения
   [commandCenter.playCommand
       addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* _Nonnull event) {
-        player->play();
+        emit mainPageModel->play();
         return MPRemoteCommandHandlerStatusSuccess;
       }];
 
-  // Обработка сигнала паузы
   [commandCenter.pauseCommand
       addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* _Nonnull event) {
-        player->pause();
+        emit mainPageModel->pause();
         return MPRemoteCommandHandlerStatusSuccess;
       }];
 
-  // Обработка изменения положения воспроизведения (перемотки)
+  [commandCenter.nextTrackCommand
+      addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* _Nonnull event) {
+        emit mainPageModel->playNext();
+        return MPRemoteCommandHandlerStatusSuccess;
+      }];
+
+  [commandCenter.previousTrackCommand
+      addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* _Nonnull event) {
+        emit mainPageModel->playPrevious();
+        return MPRemoteCommandHandlerStatusSuccess;
+      }];
+
   [commandCenter.changePlaybackPositionCommand
       addTargetWithHandler:^MPRemoteCommandHandlerStatus(MPRemoteCommandEvent* _Nonnull event) {
         MPChangePlaybackPositionCommandEvent* positionEvent =
             (MPChangePlaybackPositionCommandEvent*)event;
         // Использование корректного свойства positionTime
         qint64 positionMs = static_cast<qint64>(positionEvent.positionTime * 1000.0);
-        player->setPosition(positionMs);
+        mainPageModel->player()->setPosition(positionMs);
         return MPRemoteCommandHandlerStatusSuccess;
       }];
 
@@ -45,6 +55,26 @@ void MacOsPlayContext::updateTrackMetadata(const QString& title, double duration
   info[MPMediaItemPropertyPlaybackDuration] = @(durationSeconds);
 
   center.nowPlayingInfo = info;
+}
+
+void MacOsPlayContext::enablePalyNextOption() {
+  MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  commandCenter.nextTrackCommand.enabled = YES;
+}
+
+void MacOsPlayContext::disablePalyNextOption() {
+  MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  commandCenter.nextTrackCommand.enabled = NO;
+}
+
+void MacOsPlayContext::enablePalyPreviousOption() {
+  MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  commandCenter.previousTrackCommand.enabled = YES;
+}
+
+void MacOsPlayContext::disablePalyPreviousOption() {
+  MPRemoteCommandCenter* commandCenter = [MPRemoteCommandCenter sharedCommandCenter];
+  commandCenter.previousTrackCommand.enabled = NO;
 }
 
 void MacOsPlayContext::updatePlaybackState(double elapsedSeconds, bool isPlaying) {

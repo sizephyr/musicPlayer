@@ -32,14 +32,24 @@ class Model : public QObject {
   /// \brief для установки юайного синглтона в контекст
   Q_INVOKABLE void setPlayer(QMediaPlayer* newPlayer);
 
+  [[nodiscard]] QMediaPlayer* player() const;
+
  signals:
   void coverProvided(const QString&);
   void played(QUuid);
   void stopped();
+  void play();
+  void pause();
+  void playNext();
+  void playPrevious();
 
  public slots:
   void onFolderSelected(const QString& newCurrentPlayFolder);
   void onFileSelected(const QString& sellectedFilePath);
+ private slots:
+  void onPositionChanged(qint64 positionMs);
+  void onMetaDataChanged();
+  void onPlaybackStateChanged(QMediaPlayer::PlaybackState newState);
 
  private:  // NOLINT
   void playNext(QUuid uid);
